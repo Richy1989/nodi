@@ -1,0 +1,89 @@
+@page "/register"
+@inject ApiService Api
+@inject AuthStateProvider AuthState
+@inject NavigationManager Nav
+
+<PageTitle>Register - nodi</PageTitle>
+
+<div style="display:flex; justify-content:center; align-items:center; min-height:100vh;">
+    <MudPaper Elevation="4" Class="pa-8" Style="width:100%; max-width:400px;">
+        <MudText Typo="Typo.h4" Align="Align.Center" Class="mb-1">Create Account</MudText>
+        <MudText Typo="Typo.body2" Align="Align.Center" Color="Color.Secondary" Class="mb-6">
+            Join nodi to start taking notes
+        </MudText>
+
+        <MudTextField @bind-Value="model.Username" Label="Username" Variant="Variant.Outlined"
+                      Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Person"
+                      Class="mb-3" autocomplete="username" />
+
+        <MudTextField @bind-Value="model.Email" Label="Email" Variant="Variant.Outlined"
+                      InputType="InputType.Email"
+                      Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Email"
+                      Class="mb-3" autocomplete="email" />
+
+        <MudTextField @bind-Value="model.Password" Label="Password" Variant="Variant.Outlined"
+                      InputType="@_pwType" Adornment="Adornment.End" AdornmentIcon="@_pwIcon"
+                      OnAdornmentClick="TogglePw" Class="mb-4" autocomplete="new-password" />
+
+        @if (error is not null)
+        {
+            <MudAlert Severity="Severity.Error" Class="mb-4" Dense="true">@error</MudAlert>
+        }
+
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true"
+                   Size="Size.Large" OnClick="DoRegister" Disabled="@loading">
+            @(loading ? "Creating account..." : "Create Account")
+        </MudButton>
+
+        <MudText Typo="Typo.body2" Align="Align.Center" Class="mt-4">
+            Already have an account? <MudLink Href="/login">Sign in</MudLink>
+        </MudText>
+    </MudPaper>
+</div>
+
+@code {
+    private RegisterModel model = new();
+    private string? error;
+    private bool loading;
+    private InputType _pwType = InputType.Password;
+    private string _pwIcon = Icons.Material.Filled.VisibilityOff;
+
+    private void TogglePw()
+    {
+        if (_pwType == InputType.Password)
+        {
+            _pwType = InputType.Text;
+            _pwIcon = Icons.Material.Filled.Visibility;
+        }
+        else
+        {
+            _pwType = InputType.Password;
+            _pwIcon = Icons.Material.Filled.VisibilityOff;
+        }
+    }
+
+    private class RegisterModel
+    {
+        public string Username { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
+
+    private async Task DoRegister()
+    {
+        loading = true;
+        error = null;
+        var (result, err) = await Api.RegisterAsync(model.Username, model.Email, model.Password);
+        if (result is not null)
+        {
+            await AuthState.SetUserAsync(result);
+            await Task.Yield();
+            Nav.NavigateTo("/", forceLoad: false);
+        }
+        else
+        {
+            error = err ?? "Registration failed.";
+        }
+        loading = false;
+    }
+}

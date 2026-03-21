@@ -1,0 +1,97 @@
+@inherits LayoutComponentBase
+@inject AuthStateProvider AuthState
+
+<MudThemeProvider Theme="_theme" IsDarkMode="true" />
+<MudPopoverProvider />
+<MudDialogProvider MaxWidth="MaxWidth.Small" FullWidth="true" />
+<MudSnackbarProvider />
+
+@if (AuthState.CurrentUser is not null)
+{
+    <MudLayout>
+        <MudAppBar Elevation="0" Dense="true"
+                   Style="border-bottom:1px solid rgba(255,255,255,.06);">
+            <button class="appbar-icon-btn" @onclick="() => _drawerOpen = !_drawerOpen"
+                    title="Toggle sidebar">
+                <Blazicon Svg="Lucide.PanelLeft" />
+            </button>
+            <span class="appbar-title">nodi</span>
+            <MudSpacer />
+            <UserMenu />
+            <div style="width:6px;" />
+        </MudAppBar>
+
+        <MudDrawer @bind-Open="_drawerOpen" Variant="DrawerVariant.Responsive"
+                   Elevation="0" Width="210px"
+                   Style="border-right:1px solid rgba(255,255,255,.06);">
+            <NavMenu />
+        </MudDrawer>
+
+        <MudMainContent>
+            <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-6 pt-7">
+                @Body
+            </MudContainer>
+        </MudMainContent>
+    </MudLayout>
+}
+else
+{
+    @Body
+}
+
+@code {
+    private bool _drawerOpen = true;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && AuthState.CurrentUser is null)
+        {
+            await AuthState.TryRestoreFromStorageAsync();
+            StateHasChanged();
+        }
+    }
+
+    private readonly MudTheme _theme = new()
+    {
+        Typography = new Typography()
+        {
+            Default = new()
+            {
+                FontFamily = new[] { "Roboto", "Segoe UI", "sans-serif" }
+            },
+
+            H6 = new()
+            {
+                FontFamily = new[] { "Roboto", "Segoe UI", "sans-serif" },
+                FontWeight = 500,
+                FontSize = "1.05rem",
+                LineHeight = 1.4,
+                LetterSpacing = "0.1px"
+            },
+
+            Subtitle1 = new()
+            {
+                FontFamily = new[] { "Roboto", "Segoe UI", "sans-serif" },
+                FontWeight = 500,
+                FontSize = "1rem",
+                LineHeight = 1.4,
+                LetterSpacing = "0.1px"
+            }
+        },
+        PaletteDark = new PaletteDark()
+        {
+            Primary          = "#a78bfa",   // violet-400
+            Secondary        = "#60a5fa",   // blue-400
+            Background       = "#18181b",   // zinc-900
+            Surface          = "#27272a",   // zinc-800
+            DrawerBackground = "#111115",
+            AppbarBackground = "#111115",
+            AppbarText       = "#f4f4f5",
+            DrawerText       = "#d4d4d8",
+            TextPrimary      = "#f4f4f5",
+            TextSecondary    = "#a1a1aa",
+            ActionDefault    = "#a1a1aa",
+            Divider          = "rgba(255,255,255,0.07)",
+        }
+    };
+}

@@ -1,0 +1,144 @@
+@page "/"
+@attribute [Authorize]
+@inject ApiService Api
+@inject IDialogService DialogService
+
+<PageTitle>Notes - nodi</PageTitle>
+
+<div class="d-flex align-center gap-3 mb-6 flex-wrap">
+    <MudTextField T="string" Value="@searchTerm" Placeholder="Search notes..."
+                  Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search"
+                  Variant="Variant.Outlined" Margin="Margin.Dense" Immediate="true"
+                  ValueChanged="@((string s) => OnSearch(s))"
+                  Style="max-width:360px; flex:1;" />
+    <MudSpacer />
+    <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.NoteAdd"
+               OnClick='() => OpenEditor("Text")'>Text Note</MudButton>
+    <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Checklist"
+               OnClick='() => OpenEditor("Checklist")'>Checklist</MudButton>
+</div>
+
+@if (loading)
+{
+    <div class="d-flex justify-center pa-8">
+        <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+    </div>
+}
+else if (allNotes.Count == 0)
+{
+    <div class="d-flex flex-column align-center pa-16" style="opacity:.5;">
+        <MudIcon Icon="@Icons.Material.Outlined.NoteAdd" Style="font-size:4rem;" Class="mb-3" />
+        <MudText Typo="Typo.body1">No notes yet. Create your first note above!</MudText>
+    </div>
+}
+else
+{
+    @if (pinnedNotes.Count > 0)
+    {
+        <MudText Typo="Typo.overline" Color="Color.Secondary" Class="mb-2">Pinned</MudText>
+        <MudGrid Spacing="3" Class="mb-4">
+            @foreach (var note in pinnedNotes)
+            {
+                <MudItem xs="12" sm="6" md="4" lg="3">
+                    <NoteCard Note="note" OnClick="EditNote" OnPin="TogglePin"
+                              OnArchive="ArchiveNote" OnDelete="DeleteNote" />
+                </MudItem>
+            }
+        </MudGrid>
+        <MudDivider Class="mb-4" />
+        <MudText Typo="Typo.overline" Color="Color.Secondary" Class="mb-2">Others</MudText>
+    }
+
+    <MudGrid Spacing="3">
+        @foreach (var note in unpinnedNotes)
+        {
+            <MudItem xs="12" sm="6" md="4" lg="3">
+                <NoteCard Note="note" OnClick="EditNote" OnPin="TogglePin"
+                          OnArchive="ArchiveNote" OnDelete="DeleteNote" />
+            </MudItem>
+        }
+    </MudGrid>
+}
+
+@code {
+    private List<NoteDto> allNotes = [];
+    private List<NoteDto> pinnedNotes = [];
+    private List<NoteDto> unpinnedNotes = [];
+    private string searchTerm = string.Empty;
+    private bool loading = true;
+
+    protected override async Task OnInitializedAsync() => await LoadNotes();
+
+    private async Task LoadNotes(string? search = null)
+    {
+        loading = true;
+        allNotes = await Api.GetNotesAsync(search: search);
+        pinnedNotes = allNotes.Where(n => n.IsPinned).ToList();
+        unpinnedNotes = allNotes.Where(n => !n.IsPinned).ToList();
+        loading = false;
+    }
+
+    private async Task OnSearch(string value)
+    {
+        searchTerm = value;
+        await LoadNotes(string.IsNullOrWhiteSpace(value) ? null : value);
+    }
+
+    private async Task OpenEditor(string type)
+    {
+        var parameters = new DialogParameters<NoteEditor> { { x => x.DefaultType, type } };
+        var dialog = await DialogService.ShowAsync<NoteEditor>("New Note", parameters);
+        var result = await dialog.Result;
+        if (result is { Canceled: false, Data: SaveNoteArgs args })
+            await ProcessSave(null, args);
+    }
+
+    private async Task EditNote(NoteDto note)
+    {
+        var parameters = new DialogParameters<NoteEditor> { { x => x.ExistingNote, note } };
+        var dialog = await DialogService.ShowAsync<NoteEditor>("Edit Note", parameters);
+        var result = await dialog.Result;
+        if (result is { Canceled: false, Data: SaveNoteArgs args })
+            await ProcessSave(note, args);
+    }
+
+    private async Task ProcessSave(NoteDto? existing, SaveNoteArgs args)
+    {
+        if (string.IsNullOrWhiteSpace(args.Title) && string.IsNullOrWhiteSpace(args.Content) && args.Items.Count == 0)
+            return;
+
+        var payload = new
+        {
+            title = args.Title,
+            content = args.Content,
+            color = args.Color,
+            type = args.Type,
+            checklistItems = args.Items.Select(i => new { i.Text, i.IsChecked, i.Order }).ToList()
+        };
+
+        if (existing is null)
+            await Api.CreateNoteAsync(payload);
+        else
+            await Api.UpdateNoteAsync(existing.Id, payload);
+
+        await LoadNotes();
+    }
+
+    private async Task TogglePin(NoteDto note)
+    {
+        await Api.UpdateNoteAsync(note.Id, new { isPinned = !note.IsPinned });
+        await LoadNotes();
+    }
+
+    private async Task ArchiveNote(NoteDto note)
+    {
+        await Api.UpdateNoteAsync(note.Id, new { isArchived = true });
+        await LoadNotes();
+    }
+
+    private async Task DeleteNote(NoteDto note)
+    {
+        await Api.DeleteNoteAsync(note.Id);
+        await LoadNotes();
+    }
+}

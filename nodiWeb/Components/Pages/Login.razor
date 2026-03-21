@@ -1,0 +1,96 @@
+@page "/login"
+@inject ApiService Api
+@inject AuthStateProvider AuthState
+@inject NavigationManager Nav
+
+<PageTitle>Login - nodi</PageTitle>
+
+<div style="display:flex; justify-content:center; align-items:center; min-height:100vh;">
+    <MudPaper Elevation="4" Class="pa-8" Style="width:100%; max-width:400px;">
+        <MudText Typo="Typo.h4" Align="Align.Center" Class="mb-1">📝 nodi</MudText>
+        <MudText Typo="Typo.body2" Align="Align.Center" Color="Color.Secondary" Class="mb-6">
+            Your personal note space
+        </MudText>
+
+        <MudTextField Value="model.Username"
+                      ValueChanged="@((string v) => model.Username = v)"
+                      Label="Username" Variant="Variant.Outlined"
+                      Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Person"
+                      Class="mb-3" autocomplete="username" OnKeyDown="HandleKeyDown" />
+
+        <MudTextField Value="model.Password"
+                      ValueChanged="@((string v) => model.Password = v)"
+                      Label="Password" Variant="Variant.Outlined"
+                      InputType="@_pwType" Adornment="Adornment.End" AdornmentIcon="@_pwIcon"
+                      OnAdornmentClick="TogglePw" Class="mb-4" autocomplete="current-password"
+                      OnKeyDown="HandleKeyDown" />
+
+        @if (error is not null)
+        {
+            <MudAlert Severity="Severity.Error" Class="mb-4" Dense="true">@error</MudAlert>
+        }
+
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true"
+                   Size="Size.Large" OnClick="DoLogin" Disabled="@loading">
+            @(loading ? "Signing in..." : "Sign In")
+        </MudButton>
+
+        <MudText Typo="Typo.body2" Align="Align.Center" Class="mt-4">
+            <MudLink Href="/register">Create an account</MudLink>
+        </MudText>
+    </MudPaper>
+</div>
+
+@code {
+    private LoginModel model = new();
+    private string? error;
+    private bool loading;
+    private InputType _pwType = InputType.Password;
+    private string _pwIcon = Icons.Material.Filled.VisibilityOff;
+
+    private void TogglePw()
+    {
+        if (_pwType == InputType.Password)
+        {
+            _pwType = InputType.Text;
+            _pwIcon = Icons.Material.Filled.Visibility;
+        }
+        else
+        {
+            _pwType = InputType.Password;
+            _pwIcon = Icons.Material.Filled.VisibilityOff;
+        }
+    }
+
+    private class LoginModel
+    {
+        public string Username { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await DoLogin();
+        }
+    }
+
+    private async Task DoLogin()
+    {
+        loading = true;
+        error = null;
+        var (result, err) = await Api.LoginAsync(model.Username, model.Password);
+        if (result is not null)
+        {
+            await AuthState.SetUserAsync(result);
+            await Task.Yield();
+            Nav.NavigateTo("/", forceLoad: false);
+        }
+        else
+        {
+            error = err ?? "Login failed.";
+        }
+        loading = false;
+    }
+}

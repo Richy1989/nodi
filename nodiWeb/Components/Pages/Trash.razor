@@ -1,0 +1,83 @@
+@page "/trash"
+@attribute [Authorize]
+@inject ApiService Api
+
+<PageTitle>Trash - nodi</PageTitle>
+
+<MudText Typo="Typo.h5" Class="mb-1" Style="font-weight:600;">
+    <MudIcon Icon="@Icons.Material.Filled.Delete" Class="mr-2" Style="vertical-align:middle;" />
+    Trash
+</MudText>
+<MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-6">
+    Notes in trash will be permanently deleted after 30 days.
+</MudText>
+
+@if (loading)
+{
+    <div class="d-flex justify-center pa-8">
+        <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+    </div>
+}
+else if (notes.Count == 0)
+{
+    <div class="d-flex flex-column align-center pa-16" style="opacity:.5;">
+        <MudIcon Icon="@Icons.Material.Outlined.Delete" Style="font-size:4rem;" Class="mb-3" />
+        <MudText Typo="Typo.body1">Trash is empty.</MudText>
+    </div>
+}
+else
+{
+    <MudGrid Spacing="3">
+        @foreach (var note in notes)
+        {
+            <MudItem xs="12" sm="6" md="4" lg="3">
+                <MudCard Class="@($"note-color-{note.Color.ToLower()} h-100")" Elevation="2" Style="opacity:.75;">
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            @if (!string.IsNullOrWhiteSpace(note.Title))
+                            {
+                                <MudText Typo="Typo.subtitle1" Style="font-weight:600; text-decoration:line-through;">@note.Title</MudText>
+                            }
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardContent Class="pt-0 flex-grow-1">
+                        @if (!string.IsNullOrWhiteSpace(note.Content))
+                        {
+                            <MudText Typo="Typo.body2">@note.Content</MudText>
+                        }
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudButton Size="Size.Small" Variant="Variant.Text" StartIcon="@Icons.Material.Filled.RestoreFromTrash"
+                                   OnClick="() => Restore(note)">Restore</MudButton>
+                        <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Error"
+                                   StartIcon="@Icons.Material.Filled.DeleteForever"
+                                   OnClick="() => DeletePermanent(note)">Delete forever</MudButton>
+                    </MudCardActions>
+                </MudCard>
+            </MudItem>
+        }
+    </MudGrid>
+}
+
+@code {
+    private List<NoteDto> notes = [];
+    private bool loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        notes = await Api.GetNotesAsync(deleted: true);
+        loading = false;
+    }
+
+    private async Task Restore(NoteDto note)
+    {
+        await Api.RestoreNoteAsync(note.Id);
+        notes = await Api.GetNotesAsync(deleted: true);
+    }
+
+    private async Task DeletePermanent(NoteDto note)
+    {
+        await Api.PermanentDeleteNoteAsync(note.Id);
+        notes = await Api.GetNotesAsync(deleted: true);
+    }
+}

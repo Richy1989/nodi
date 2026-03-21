@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="nodeCommon/nodeCommon.csproj" Id="1fdcf754-39f3-4403-8749-dc891759f380" />
+  <Project Path="nodiApp/nodiApp.csproj">
+    <Deploy Solution="Debug|*" />
+  </Project>
+  <Project Path="nodiCore/nodiCore.csproj" />
+  <Project Path="nodiWeb/nodiWeb.csproj" />
+</Solution>

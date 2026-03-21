@@ -1,0 +1,193 @@
+/* ─── Note card colors ───────────────────────────────────────────────────── */
+.note-color-default        { background-color: #2a2a2e !important; }
+
+.note-color-salmon         { background-color: #8f3a3a !important; }
+.note-color-peach          { background-color: #9a5a2b !important; }
+.note-color-lightyellow    { background-color: #9a8b2f !important; }
+
+.note-color-mint           { background-color: #2f7a4a !important; }
+.note-color-cyan           { background-color: #2f7a7a !important; }
+
+.note-color-skyblue        { background-color: #3a6fb0 !important; }
+.note-color-cornflowerblue { background-color: #4a6fd1 !important; }
+
+.note-color-lavender       { background-color: #6a4fb3 !important; }
+.note-color-hotpink        { background-color: #a03a7a !important; }
+
+.note-color-tan            { background-color: #8a5a3a !important; }
+.note-color-silver         { background-color: #5a5a60 !important; }
+
+/* ─── Note card ──────────────────────────────────────────────────────────── */
+.note-card {
+    transition: transform .15s ease, box-shadow .15s ease;
+    border-radius: 10px !important;
+}
+.note-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,.4) !important;
+}
+
+/* Action buttons — hidden until card is hovered */
+.card-actions .icon-btn { opacity: 0; transition: opacity .12s; }
+.note-card:hover .card-actions .icon-btn { opacity: 1; }
+.icon-btn-active { opacity: 1 !important; }
+
+/* ─── Icon buttons (NoteCard actions) ───────────────────────────────────── */
+.icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 6px;
+    color: rgba(255,255,255,.55);
+    font-size: 15px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: color .12s, background .12s;
+    line-height: 1;
+}
+.icon-btn:hover {
+    color: rgba(255,255,255,.95);
+    background: rgba(255,255,255,.09);
+}
+.icon-btn-active {
+    color: #a78bfa !important;
+}
+.icon-btn-danger:hover {
+    color: #f87171 !important;
+    background: rgba(248,113,113,.1);
+}
+
+/* ─── Checklist rows ─────────────────────────────────────────────────────── */
+.checklist-row {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 4px;
+    font-size: 15px;
+    color: rgba(255,255,255,.85);
+}
+.checklist-row.checked {
+    opacity: .45;
+    text-decoration: line-through;
+}
+
+/* ─── Color picker ───────────────────────────────────────────────────────── */
+.color-dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color .15s, transform .1s;
+    flex-shrink: 0;
+}
+
+.color-dot:hover {
+    transform: scale(1.2);
+    border-color: rgba(255,255,255,.4) !important;
+}
+.color-selected    { border-color: white !important; transform: scale(1.15); }
+
+/* ─── Sidebar navigation ─────────────────────────────────────────────────── */
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    padding: .5rem 0;
+    gap: 1px;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 14px;
+    margin: 0 8px;
+    border-radius: 7px;
+    color: #a1a1aa;
+    text-decoration: none;
+    font-size: .875rem;
+    font-weight: 500;
+    transition: background .12s, color .12s;
+}
+.sidebar-link:hover {
+    background: rgba(255,255,255,.06);
+    color: #e4e4e7;
+}
+.sidebar-link.active {
+    background: rgba(167,139,250,.14);
+    color: #a78bfa;
+}
+.sidebar-icon {
+    font-size: 16px;
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+.sidebar-divider {
+    height: 1px;
+    background: rgba(255,255,255,.07);
+    margin: 6px 16px;
+    border: none;
+}
+
+/* ─── AppBar ─────────────────────────────────────────────────────────────── */
+.appbar-icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px 8px;
+    border-radius: 6px;
+    color: rgba(255,255,255,.75);
+    font-size: 18px;
+    display: inline-flex;
+    align-items: center;
+    transition: color .12s, background .12s;
+    margin-right: 4px;
+}
+.appbar-icon-btn:hover {
+    background: rgba(255,255,255,.08);
+    color: #f4f4f5;
+}
+.appbar-title {
+    font-size: .9rem;
+    font-weight: 700;
+    letter-spacing: .5px;
+    color: rgba(255,255,255,.85);
+}
+
+/* ─── User menu ──────────────────────────────────────────────────────────── */
+.user-avatar-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #a78bfa;
+    color: #fff;
+    font-size: .7rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+    transition: opacity .12s;
+}
+.user-avatar-btn:hover { opacity: .85; }
+
+.user-menu-header {
+    min-width: 210px;
+    padding: .65rem 1rem .5rem;
+    border-bottom: 1px solid rgba(255,255,255,.07);
+}
+.user-menu-name  { font-weight: 600; font-size: .875rem; }
+.user-menu-email { font-size: .75rem; opacity: .55; margin-top: 1px; }
+
+.menu-item-row {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: .875rem;
+}
+.menu-item-icon { font-size: 15px; display: inline-flex; align-items: center; }
+.menu-item-danger { color: #f87171; }

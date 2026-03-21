@@ -1,0 +1,32 @@
+@inject AuthStateProvider AuthState
+@inject NavigationManager Nav
+
+<MudMenu Dense="true" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
+    <ActivatorContent>
+        <div class="user-avatar-btn" title="@AuthState.CurrentUser?.Username">
+            @(AuthState.CurrentUser?.Username?.FirstOrDefault().ToString().ToUpper())
+        </div>
+    </ActivatorContent>
+    <ChildContent>
+        <div class="user-menu-header">
+            <div class="user-menu-name">@AuthState.CurrentUser?.Username</div>
+            <div class="user-menu-email">@AuthState.CurrentUser?.Email</div>
+        </div>
+        <MudMenuItem Icon="@Icons.Material.Outlined.Settings" Disabled="true">Settings</MudMenuItem>
+        <MudDivider />
+        <MudMenuItem OnClick="Logout">
+            <div class="menu-item-row menu-item-danger">
+                <span class="menu-item-icon"><Blazicon Svg="Lucide.LogOut" /></span>
+                <span>Logout</span>
+            </div>
+        </MudMenuItem>
+    </ChildContent>
+</MudMenu>
+
+@code {
+    private async Task Logout()
+    {
+        await AuthState.SetUserAsync(null);
+        Nav.NavigateTo("/login", forceLoad: false);
+    }
+}

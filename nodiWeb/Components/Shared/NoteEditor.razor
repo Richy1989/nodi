@@ -1,0 +1,114 @@
+<MudDialog>
+    <TitleContent>
+        <MudTextField @bind-Value="editNote.Title" Placeholder="Title"
+                      Variant="Variant.Text" Typo="Typo.h6"
+                      DisableUnderLine="true" Style="font-weight:600; font-size:1.1rem;" />
+    </TitleContent>
+    <DialogContent>
+        @if (editNote.Type == "Checklist")
+        {
+            <div class="mb-3">
+                @for (int i = 0; i < items.Count; i++)
+                {
+                    var idx = i;
+                    <div class="d-flex align-center gap-2 mb-2">
+                        <MudCheckBox T="bool" Value="@items[idx].IsChecked"
+                                             ValueChanged="@((bool v) => items[idx].IsChecked = v)"
+                                             Size="Size.Small" Color="Color.Primary" />
+                        <MudTextField @bind-Value="items[idx].Text" Placeholder="List item"
+                                      Variant="Variant.Text" Margin="Margin.Dense" FullWidth="true"
+                                      DisableUnderLine="true" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Close" Size="Size.Small"
+                                       OnClick="() => RemoveItem(idx)" />
+                    </div>
+                }
+                <MudButton StartIcon="@Icons.Material.Filled.Add" Size="Size.Small"
+                           Variant="Variant.Text" OnClick="AddItem">Add item</MudButton>
+            </div>
+        }
+        else
+        {
+            <MudTextField @bind-Value="editNote.Content" Placeholder="Take a note..."
+                          Variant="Variant.Text" Lines="6" AutoGrow="true"
+                          DisableUnderLine="true" FullWidth="true" />
+        }
+
+        <MudDivider Class="my-3" />
+
+        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-2">Color</MudText>
+        <div class="d-flex flex-wrap gap-2" style="padding-bottom: 5px;">
+            @foreach (var color in Colors)
+            {
+                <div class="color-dot note-color-@color.ToLower() @(editNote.Color == color ? "color-selected" : "")"
+                     title="@color" @onclick="() => editNote.Color = color"></div>
+            }
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel" Variant="Variant.Text">Close</MudButton>
+        <MudButton OnClick="Save" Variant="Variant.Filled" Color="Color.Primary">Save</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public NoteDto? ExistingNote { get; set; }
+    [Parameter] public string DefaultType { get; set; } = "Text";
+
+    //private static readonly string[] Colors = ["Default", "Red", "Orange", "Yellow", "Green", "Teal", "Blue", "DarkBlue", "Purple", "Pink", "Brown", "Gray"];
+    private static readonly string[] Colors = ["Default", "Salmon", "Peach", "LightYellow", "Mint", "Cyan", "SkyBlue", "CornflowerBlue", "Lavender", "HotPink", "Tan", "Silver"];
+    private EditModel editNote = new();
+    private List<ItemModel> items = [];
+
+    protected override void OnParametersSet()
+    {
+        if (ExistingNote is not null)
+        {
+            editNote = new EditModel
+            {
+                Title = ExistingNote.Title,
+                Content = ExistingNote.Content,
+                Color = ExistingNote.Color,
+                Type = ExistingNote.Type
+            };
+            items = ExistingNote.ChecklistItems
+                .Select(i => new ItemModel { Text = i.Text, IsChecked = i.IsChecked, Order = i.Order })
+                .ToList();
+        }
+        else
+        {
+            editNote = new EditModel { Type = DefaultType };
+            items = [];
+        }
+    }
+
+    private void AddItem() => items.Add(new ItemModel { Order = items.Count });
+    private void RemoveItem(int idx) => items.RemoveAt(idx);
+    private void Cancel() => MudDialog.Cancel();
+
+    private void Save()
+    {
+        MudDialog.Close(new SaveNoteArgs(
+            editNote.Title,
+            editNote.Content,
+            editNote.Color,
+            editNote.Type,
+            items.Select((it, i) => new NoteItemArg(it.Text, it.IsChecked, i)).ToList()
+        ));
+    }
+
+    private class EditModel
+    {
+        public string Title { get; set; } = string.Empty;
+        public string? Content { get; set; }
+        public string Color { get; set; } = "Default";
+        public string Type { get; set; } = "Text";
+    }
+
+    private class ItemModel
+    {
+        public string Text { get; set; } = string.Empty;
+        public bool IsChecked { get; set; }
+        public int Order { get; set; }
+    }
+}

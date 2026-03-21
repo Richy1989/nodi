@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="nodiApp.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:views="clr-namespace:nodiApp.Views"
+    Shell.BackgroundColor="#202124"
+    Shell.ForegroundColor="#E8EAED"
+    Shell.TitleColor="#E8EAED"
+    Shell.NavBarHasShadow="False">
+
+    <ShellContent x:Name="LoginShell"
+                  Route="login"
+                  ContentTemplate="{DataTemplate views:LoginPage}"
+                  Shell.NavBarIsVisible="False"/>
+
+    <ShellContent x:Name="NotesShell"
+                  Title="Notes"
+                  Route="notes"
+                  ContentTemplate="{DataTemplate views:NotesPage}"/>
+
+</Shell>

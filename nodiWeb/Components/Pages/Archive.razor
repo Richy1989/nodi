@@ -1,0 +1,90 @@
+@page "/archive"
+@attribute [Authorize]
+@inject ApiService Api
+
+<PageTitle>Archive - nodi</PageTitle>
+
+<MudText Typo="Typo.h5" Class="mb-6" Style="font-weight:600;">
+    <MudIcon Icon="@Icons.Material.Filled.Archive" Class="mr-2" Style="vertical-align:middle;" />
+    Archive
+</MudText>
+
+@if (loading)
+{
+    <div class="d-flex justify-center pa-8">
+        <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+    </div>
+}
+else if (notes.Count == 0)
+{
+    <div class="d-flex flex-column align-center pa-16" style="opacity:.5;">
+        <MudIcon Icon="@Icons.Material.Outlined.Archive" Style="font-size:4rem;" Class="mb-3" />
+        <MudText Typo="Typo.body1">No archived notes.</MudText>
+    </div>
+}
+else
+{
+    <MudGrid Spacing="3">
+        @foreach (var note in notes)
+        {
+            <MudItem xs="12" sm="6" md="4" lg="3">
+                <MudCard Class="@($"note-color-{note.Color.ToLower()} h-100")" Elevation="2">
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            @if (!string.IsNullOrWhiteSpace(note.Title))
+                            {
+                                <MudText Typo="Typo.subtitle1" Style="font-weight:600;">@note.Title</MudText>
+                            }
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardContent Class="pt-0 flex-grow-1">
+                        @if (note.Type == "Checklist")
+                        {
+                            @foreach (var item in note.ChecklistItems.Take(5))
+                            {
+                                <div class="d-flex align-center gap-2 @(item.IsChecked ? "text-decoration-line-through" : "")" style="@(item.IsChecked ? "opacity:.5" : "")">
+                                    <MudIcon Icon="@(item.IsChecked ? Icons.Material.Filled.CheckBox : Icons.Material.Outlined.CheckBoxOutlineBlank)" Size="Size.Small" />
+                                    <MudText Typo="Typo.body2">@item.Text</MudText>
+                                </div>
+                            }
+                        }
+                        else if (!string.IsNullOrWhiteSpace(note.Content))
+                        {
+                            <MudText Typo="Typo.body2">@note.Content</MudText>
+                        }
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudButton Size="Size.Small" Variant="Variant.Text" StartIcon="@Icons.Material.Filled.Unarchive"
+                                   OnClick="() => Unarchive(note)">Unarchive</MudButton>
+                        <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Error"
+                                   StartIcon="@Icons.Material.Filled.Delete"
+                                   OnClick="() => Delete(note)">Delete</MudButton>
+                    </MudCardActions>
+                </MudCard>
+            </MudItem>
+        }
+    </MudGrid>
+}
+
+@code {
+    private List<NoteDto> notes = [];
+    private bool loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        notes = await Api.GetNotesAsync(archived: true);
+        loading = false;
+    }
+
+    private async Task Unarchive(NoteDto note)
+    {
+        await Api.UpdateNoteAsync(note.Id, new { isArchived = false });
+        notes = await Api.GetNotesAsync(archived: true);
+    }
+
+    private async Task Delete(NoteDto note)
+    {
+        await Api.DeleteNoteAsync(note.Id);
+        notes = await Api.GetNotesAsync(archived: true);
+    }
+}

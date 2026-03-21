@@ -1,0 +1,21 @@
+@inject NavigationManager Nav
+@inject AuthStateProvider AuthState
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        // MainLayout never renders when NotAuthorized fires, so we must
+        // trigger the storage restore here before deciding to redirect.
+        await AuthState.TryRestoreFromStorageAsync();
+
+        // If still no user after restore, the session is genuinely gone.
+        if (AuthState.CurrentUser is null)
+            Nav.NavigateTo("/login", forceLoad: false);
+
+        // If CurrentUser was restored, NotifyAuthenticationStateChanged fired
+        // inside TryRestoreFromStorageAsync, AuthorizeRouteView re-renders to
+        // the authorized view, and this component is discarded — no redirect.
+    }
+}

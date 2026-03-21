@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:nodiApp.ViewModels"
+             x:Class="nodiApp.Views.NotesPage"
+             x:DataType="vm:NotesViewModel"
+             Title="nodi"
+             BackgroundColor="#202124">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="📝" Command="{Binding CreateNoteCommand}" CommandParameter="Text" />
+        <ToolbarItem Text="☑" Command="{Binding CreateNoteCommand}" CommandParameter="Checklist" />
+    </ContentPage.ToolbarItems>
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- Search Bar -->
+        <Border Grid.Row="0" BackgroundColor="#2D2E30" Stroke="#5F6368" StrokeThickness="1"
+                StrokeShape="RoundRectangle 24" Margin="12,8">
+            <SearchBar Text="{Binding SearchText}" Placeholder="🔍 Search notes..."
+                       PlaceholderColor="#9AA0A6" TextColor="#E8EAED"
+                       BackgroundColor="Transparent" CancelButtonColor="#8AB4F8"/>
+        </Border>
+
+        <!-- Notes Grid -->
+        <CollectionView Grid.Row="1"
+                        ItemsSource="{Binding Notes}"
+                        ItemsLayout="VerticalGrid, 2"
+                        Margin="8,0"
+                        IsRefreshControlVisible="True">
+            <CollectionView.EmptyView>
+                <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="12" Padding="32">
+                    <Label Text="📋" FontSize="48" HorizontalOptions="Center"/>
+                    <Label Text="No notes yet" TextColor="#9AA0A6" FontSize="16" HorizontalOptions="Center"/>
+                    <Label Text="Tap the ✏ button to create your first note"
+                           TextColor="#6E6E6E" FontSize="13" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="vm:NoteWithItems">
+                    <Border Margin="4" Padding="12" StrokeShape="RoundRectangle 8"
+                            Stroke="#5F636820">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:NotesViewModel}}, Path=OpenNoteCommand}"
+                                                  CommandParameter="{Binding .}"/>
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="{Binding Note.Title}" FontAttributes="Bold"
+                                   TextColor="#E8EAED" FontSize="14"
+                                   IsVisible="{Binding Note.Title, Converter={StaticResource IsNotEmptyConverter}}"
+                                   LineBreakMode="TailTruncation" MaxLines="2"/>
+
+                            <Label Text="{Binding Note.Content}" TextColor="#9AA0A6"
+                                   FontSize="13" LineBreakMode="TailTruncation" MaxLines="5"
+                                   IsVisible="{Binding Note.Content, Converter={StaticResource IsNotNullConverter}}"/>
+
+                            <!-- Checklist preview -->
+                            <BindableLayout.ItemsSource>
+                                <Binding Path="Items"/>
+                            </BindableLayout.ItemsSource>
+
+                            <HorizontalStackLayout Spacing="8" Margin="0,4,0,0">
+                                <Button Text="📌" Command="{Binding Source={RelativeSource AncestorType={x:Type vm:NotesViewModel}}, Path=TogglePinCommand}"
+                                        CommandParameter="{Binding .}"
+                                        BackgroundColor="Transparent" TextColor="#9AA0A6" FontSize="14"
+                                        Padding="4" MinimumHeightRequest="0" HeightRequest="32"/>
+                                <Button Text="📦" Command="{Binding Source={RelativeSource AncestorType={x:Type vm:NotesViewModel}}, Path=ArchiveCommand}"
+                                        CommandParameter="{Binding .}"
+                                        BackgroundColor="Transparent" TextColor="#9AA0A6" FontSize="14"
+                                        Padding="4" MinimumHeightRequest="0" HeightRequest="32"/>
+                                <Button Text="🗑" Command="{Binding Source={RelativeSource AncestorType={x:Type vm:NotesViewModel}}, Path=DeleteCommand}"
+                                        CommandParameter="{Binding .}"
+                                        BackgroundColor="Transparent" TextColor="#9AA0A6" FontSize="14"
+                                        Padding="4" MinimumHeightRequest="0" HeightRequest="32"/>
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+    </Grid>
+
+</ContentPage>

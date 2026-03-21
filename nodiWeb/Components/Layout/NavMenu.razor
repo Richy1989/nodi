@@ -1,0 +1,23 @@
+@inject AuthStateProvider AuthState
+
+<div class="sidebar-nav">
+    <NavLink href="/" Match="NavLinkMatch.All" class="sidebar-link">
+        <span class="sidebar-icon"><Blazicon Svg="Lucide.NotepadText" /></span>
+        <span>Notes</span>
+    </NavLink>
+    <NavLink href="/archive" class="sidebar-link">
+        <span class="sidebar-icon"><Blazicon Svg="Lucide.Archive" /></span>
+        <span>Archive</span>
+    </NavLink>
+    <NavLink href="/trash" class="sidebar-link">
+        <span class="sidebar-icon"><Blazicon Svg="Lucide.Trash2" /></span>
+        <span>Trash</span>
+    </NavLink>
+    <AuthorizeView Roles="Admin">
+        <div class="sidebar-divider"></div>
+        <NavLink href="/admin" class="sidebar-link">
+            <span class="sidebar-icon"><Blazicon Svg="Lucide.ShieldCheck" /></span>
+            <span>Admin</span>
+        </NavLink>
+    </AuthorizeView>
+</div>

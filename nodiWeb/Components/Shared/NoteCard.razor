@@ -1,0 +1,76 @@
+<MudCard Class="@($"note-color-{Note.Color.ToLower()} note-card h-100")" Elevation="2"
+         @onclick="() => OnClick.InvokeAsync(Note)" style="cursor:pointer;">
+    <MudCardHeader Class="pb-0">
+        <CardHeaderContent>
+            @if (!string.IsNullOrWhiteSpace(Note.Title))
+            {
+                <MudText Typo="Typo.h6" Style="font-weight:500; letter-spacing:0.15px; line-height:1.4;">
+                    @Note.Title
+                </MudText>
+            }
+        </CardHeaderContent>
+        <CardHeaderActions>
+            <span class="card-actions" @onclick:stopPropagation>
+                <button class="icon-btn @(Note.IsPinned ? "icon-btn-active" : "")"
+                        title="@(Note.IsPinned ? "Unpin" : "Pin")"
+                        @onclick="() => OnPin.InvokeAsync(Note)">
+                    <Blazicon Svg="Lucide.Pin" />
+                </button>
+                <button class="icon-btn" title="Archive"
+                        @onclick="() => OnArchive.InvokeAsync(Note)">
+                    <Blazicon Svg="Lucide.Archive" />
+                </button>
+                <button class="icon-btn icon-btn-danger" title="Delete"
+                        @onclick="() => OnDelete.InvokeAsync(Note)">
+                    <Blazicon Svg="Lucide.Trash2" />
+                </button>
+            </span>
+        </CardHeaderActions>
+    </MudCardHeader>
+
+    <MudCardContent Class="pt-1 pb-1 flex-grow-1">
+        @if (Note.Type == "Checklist")
+        {
+            @foreach (var item in Note.ChecklistItems.Take(8))
+            {
+                <div class="checklist-row @(item.IsChecked ? "checked" : "")">
+                    <Blazicon Svg="@(item.IsChecked ? Lucide.SquareCheck : Lucide.Square)" />
+                    <MudText Typo="Typo.body2">@item.Text</MudText>
+                </div>
+            }
+            @if (Note.ChecklistItems.Count > 8)
+            {
+                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                    +@(Note.ChecklistItems.Count - 8) more
+                </MudText>
+            }
+        }
+        else if (!string.IsNullOrWhiteSpace(Note.Content))
+        {
+            <MudText Typo="Typo.body2"
+                     Style="white-space:pre-wrap; overflow:hidden; display:-webkit-box; -webkit-line-clamp:8; -webkit-box-orient:vertical;">
+                @Note.Content
+            </MudText>
+        }
+    </MudCardContent>
+
+    <MudCardActions Class="pt-0 pb-2 px-3 flex-wrap gap-1">
+        @foreach (var tag in Note.Tags)
+        {
+            <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Class="ma-0">@tag.Name</MudChip>
+        }
+        <MudSpacer />
+        <MudText Typo="Typo.caption" Color="Color.Secondary">
+            @Note.UpdatedAt.ToString("MMM d, yyyy")
+        </MudText>
+    </MudCardActions>
+</MudCard>
+
+@code {
+    [Parameter, EditorRequired] public NoteDto Note { get; set; } = null!;
+    [Parameter] public EventCallback<NoteDto> OnClick { get; set; }
+    [Parameter] public EventCallback<NoteDto> OnPin { get; set; }
+    [Parameter] public EventCallback<NoteDto> OnArchive { get; set; }
+    [Parameter] public EventCallback<NoteDto> OnDelete { get; set; }
+    [Parameter] public EventCallback<NoteDto> OnRestore { get; set; }
+}

@@ -1,0 +1,125 @@
+@page "/admin"
+@attribute [Authorize(Roles = "Admin")]
+@inject ApiService Api
+
+<PageTitle>Admin - nodi</PageTitle>
+
+<MudText Typo="Typo.h5" Class="mb-6" Style="font-weight:600;">
+    <MudIcon Icon="@Icons.Material.Filled.AdminPanelSettings" Class="mr-2" Style="vertical-align:middle;" />
+    Admin Panel
+</MudText>
+
+<MudGrid Spacing="4">
+    <MudItem xs="12" md="4">
+        <MudCard Elevation="2">
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Settings</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                @foreach (var setting in settings)
+                {
+                    <div class="d-flex align-center justify-space-between mb-3">
+                        <MudText Typo="Typo.body2">@setting.Key</MudText>
+                        @if (setting.Value is "true" or "false")
+                        {
+                            <MudSwitch Value="@(setting.Value == "true")"
+                                       ValueChanged="@((bool v) => OnBoolSettingChanged(setting.Key, v))"
+                                       T="bool" Color="Color.Primary" />
+                        }
+                        else
+                        {
+                            <MudTextField Value="@setting.Value"
+                                          ValueChanged="@((string v) => OnTextSettingChanged(setting.Key, v))"
+                                          T="string" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                          Style="max-width:160px;" />
+                        }
+                    </div>
+                }
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" md="8">
+        <MudCard Elevation="2">
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Users</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent Class="pa-0">
+                <MudTable Items="users" Dense="true" Hover="true" Breakpoint="Breakpoint.Sm">
+                    <HeaderContent>
+                        <MudTh>Username</MudTh>
+                        <MudTh>Email</MudTh>
+                        <MudTh>Role</MudTh>
+                        <MudTh>Active</MudTh>
+                        <MudTh>Actions</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@context.Username</MudTd>
+                        <MudTd>@context.Email</MudTd>
+                        <MudTd>
+                            <MudChip T="string" Size="Size.Small"
+                                     Color="@(context.Role == "Admin" ? Color.Primary : Color.Default)">
+                                @context.Role
+                            </MudChip>
+                        </MudTd>
+                        <MudTd>
+                            <MudIcon Icon="@(context.IsActive ? Icons.Material.Filled.CheckCircle : Icons.Material.Filled.Cancel)"
+                                     Color="@(context.IsActive ? Color.Success : Color.Error)" Size="Size.Small" />
+                        </MudTd>
+                        <MudTd>
+                            @if (context.Role != "Admin")
+                            {
+                                <MudButton Size="Size.Small" Variant="Variant.Text"
+                                           OnClick="() => ToggleActive(context)">
+                                    @(context.IsActive ? "Deactivate" : "Activate")
+                                </MudButton>
+                                <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Error"
+                                           OnClick="() => DeleteUser(context)">Delete</MudButton>
+                            }
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private List<UserDto> users = [];
+    private List<AppSettingDto> settings = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        users = await Api.GetUsersAsync();
+        settings = await Api.GetSettingsAsync();
+    }
+
+    private Task OnBoolSettingChanged(string key, bool value)
+        => UpdateSetting(key, value ? "true" : "false");
+
+    private Task OnTextSettingChanged(string key, string value)
+        => UpdateSetting(key, value);
+
+    private async Task UpdateSetting(string key, string value)
+    {
+        var updated = settings.Select(s => s.Key == key ? new AppSettingDto(s.Key, value) : s).ToList();
+        if (await Api.UpdateSettingsAsync(updated))
+            settings = updated;
+    }
+
+    private async Task ToggleActive(UserDto user)
+    {
+        if (await Api.UpdateUserAsync(user.Id, new { isActive = !user.IsActive }))
+            users = await Api.GetUsersAsync();
+    }
+
+    private async Task DeleteUser(UserDto user)
+    {
+        if (await Api.DeleteUserAsync(user.Id))
+            users = users.Where(u => u.Id != user.Id).ToList();
+    }
+}

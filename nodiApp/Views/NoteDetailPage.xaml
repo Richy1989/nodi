@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:nodiApp.ViewModels"
+             x:Class="nodiApp.Views.NoteDetailPage"
+             x:DataType="vm:NoteDetailViewModel"
+             Title="Note"
+             BackgroundColor="#202124">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Save" Command="{Binding SaveCommand}"/>
+    </ContentPage.ToolbarItems>
+
+    <ScrollView Padding="16">
+        <VerticalStackLayout Spacing="16">
+
+            <!-- Title -->
+            <Border BackgroundColor="#2D2E30" Stroke="#5F6368" StrokeThickness="1"
+                    StrokeShape="RoundRectangle 8">
+                <Entry Text="{Binding Title}" Placeholder="Title"
+                       PlaceholderColor="#6E6E6E" TextColor="#E8EAED"
+                       FontAttributes="Bold" FontSize="18"
+                       BackgroundColor="Transparent" Margin="12,8"/>
+            </Border>
+
+            <!-- Content (text note) -->
+            <Border BackgroundColor="#2D2E30" Stroke="#5F6368" StrokeThickness="1"
+                    StrokeShape="RoundRectangle 8"
+                    IsVisible="{Binding IsChecklist, Converter={StaticResource InvertBoolConverter}}">
+                <Editor Text="{Binding Content}" Placeholder="Take a note..."
+                        PlaceholderColor="#6E6E6E" TextColor="#9AA0A6"
+                        BackgroundColor="Transparent" AutoSize="TextChanges"
+                        MinimumHeightRequest="120" Margin="12,8"/>
+            </Border>
+
+            <!-- Checklist -->
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsChecklist}">
+                <BindableLayout.ItemsSource>
+                    <Binding Path="ChecklistItems"/>
+                </BindableLayout.ItemsSource>
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ChecklistItemViewModel">
+                        <Border BackgroundColor="#2D2E30" Stroke="#5F6368" StrokeThickness="1"
+                                StrokeShape="RoundRectangle 8" Padding="12,8">
+                            <HorizontalStackLayout Spacing="10">
+                                <CheckBox IsChecked="{Binding IsChecked}" Color="#8AB4F8"/>
+                                <Entry Text="{Binding Text}" Placeholder="List item"
+                                       PlaceholderColor="#6E6E6E" TextColor="#E8EAED"
+                                       BackgroundColor="Transparent" HorizontalOptions="FillAndExpand"/>
+                            </HorizontalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+
+                <Button Text="+ Add item" Command="{Binding AddChecklistItemCommand}"
+                        BackgroundColor="Transparent" TextColor="#8AB4F8"
+                        HorizontalOptions="Start" Padding="4,8"/>
+            </VerticalStackLayout>
+
+            <!-- Color Picker -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Color" TextColor="#9AA0A6" FontSize="12" FontAttributes="Bold"/>
+                <HorizontalStackLayout Spacing="8" FlexLayout.Wrap="Wrap">
+                    <Button Text=" " BackgroundColor="#5F6368" Command="{Binding Source={RelativeSource AncestorType={x:Type vm:NoteDetailViewModel}}, Path=.}" CornerRadius="20" WidthRequest="36" HeightRequest="36"
+                            CommandParameter="Default"/>
+                    <Button Text=" " BackgroundColor="#B5433A" CornerRadius="20" WidthRequest="36" HeightRequest="36"
+                            CommandParameter="Red"/>
+                    <Button Text=" " BackgroundColor="#C07B2C" CornerRadius="20" WidthRequest="36" HeightRequest="36"
+                            CommandParameter="Orange"/>
+                    <Button Text=" " BackgroundColor="#C4B400" CornerRadius="20" WidthRequest="36" HeightRequest="36"
+                            CommandParameter="Yellow"/>
+                    <Button Text=" " BackgroundColor="#5A9E3B" CornerRadius="20" WidthRequest="36" HeightRequest="36"
+                            CommandParameter="Green"/>
+                    <Button Text=" " BackgroundColor="#2A9187" CornerRadius="20" WidthRequest="36" HeightRequest="36"
+                            CommandParameter="Teal"/>
+                    <Button Text=" " BackgroundColor="#4A8FA3" CornerRadius="20" WidthRequest="36" HeightRequest="36"
+                            CommandParameter="Blue"/>
+                    <Button Text=" " BackgroundColor="#7B4BA6" CornerRadius="20" WidthRequest="36" HeightRequest="36"
+                            CommandParameter="Purple"/>
+                    <Button Text=" " BackgroundColor="#9E3F7A" CornerRadius="20" WidthRequest="36" HeightRequest="36"
+                            CommandParameter="Pink"/>
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

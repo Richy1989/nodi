@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:nodiApp.ViewModels"
+             x:Class="nodiApp.Views.LoginPage"
+             x:DataType="vm:LoginViewModel"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="#202124">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="32,64,32,32" Spacing="0" VerticalOptions="Center">
+
+            <Label Text="📝" FontSize="64" HorizontalOptions="Center" Margin="0,0,0,8"/>
+            <Label Text="nodi" FontSize="32" FontAttributes="Bold"
+                   TextColor="#E8EAED" HorizontalOptions="Center" Margin="0,0,0,4"/>
+            <Label Text="Your personal note space" FontSize="14"
+                   TextColor="#9AA0A6" HorizontalOptions="Center" Margin="0,0,0,40"/>
+
+            <Border BackgroundColor="#2D2E30" Stroke="#5F6368" StrokeThickness="1"
+                    StrokeShape="RoundRectangle 12" Padding="20,24">
+                <VerticalStackLayout Spacing="16">
+
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="Username" TextColor="#9AA0A6" FontSize="12" FontAttributes="Bold"/>
+                        <Border BackgroundColor="#303134" Stroke="#5F6368" StrokeThickness="1"
+                                StrokeShape="RoundRectangle 8">
+                            <Entry Text="{Binding Username}" Placeholder="Enter username"
+                                   PlaceholderColor="#6E6E6E" TextColor="#E8EAED"
+                                   BackgroundColor="Transparent" Margin="12,0"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="Password" TextColor="#9AA0A6" FontSize="12" FontAttributes="Bold"/>
+                        <Border BackgroundColor="#303134" Stroke="#5F6368" StrokeThickness="1"
+                                StrokeShape="RoundRectangle 8">
+                            <Entry Text="{Binding Password}" Placeholder="Enter password"
+                                   PlaceholderColor="#6E6E6E" TextColor="#E8EAED"
+                                   IsPassword="True" BackgroundColor="Transparent" Margin="12,0"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <Label Text="{Binding ErrorMessage}" TextColor="#F28B82"
+                           FontSize="13" IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNullConverter}}"/>
+
+                    <Button Text="Sign In" Command="{Binding LoginCommand}"
+                            IsEnabled="{Binding IsLoading, Converter={StaticResource InvertBoolConverter}}"
+                            BackgroundColor="#8AB4F8" TextColor="#202124"
+                            FontAttributes="Bold" CornerRadius="20" HeightRequest="48"/>
+
+                    <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+                                       Color="#8AB4F8" HorizontalOptions="Center"/>
+                </VerticalStackLayout>
+            </Border>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
