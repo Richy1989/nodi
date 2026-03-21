@@ -1,5 +1,7 @@
 # Nodi
 
+> **Work in progress.** This project is under heavy active development and has not been released. Expect breaking changes, incomplete features, and rough edges.
+
 A multi-platform note-taking app built with .NET 10.
 
 ## Projects
