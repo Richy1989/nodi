@@ -27,6 +27,14 @@
     box-shadow: 0 8px 24px rgba(0,0,0,.4) !important;
 }
 
+.text-black {
+    color: black;
+}
+
+.text-white {
+    color: white;
+}
+
 /* Action buttons — hidden until card is hovered */
 .card-actions .icon-btn { opacity: 0; transition: opacity .12s; }
 .note-card:hover .card-actions .icon-btn { opacity: 1; }
@@ -89,6 +97,41 @@
     border-color: rgba(255,255,255,.4) !important;
 }
 .color-selected    { border-color: white !important; transform: scale(1.15); }
+
+/* ─── Sidebar brand ──────────────────────────────────────────────────────── */
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 14px 14px;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+    margin-bottom: 4px;
+}
+
+/* Placeholder box — remove once a real logo image is in place */
+.sidebar-logo-placeholder {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    background: #a78bfa;
+    flex-shrink: 0;
+}
+
+/* Actual logo image — sized to match the placeholder */
+.sidebar-logo {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.sidebar-brand-name {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: .3px;
+    color: #f4f4f5;
+}
 
 /* ─── Sidebar navigation ─────────────────────────────────────────────────── */
 .sidebar-nav {
