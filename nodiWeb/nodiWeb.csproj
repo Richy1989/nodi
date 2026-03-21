@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\nodeCommon\nodeCommon.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Blazicons.Lucide" Version="2.1.3" />
     <PackageReference Include="MudBlazor" Version="7.*" />
     <PackageReference Include="PSC.Blazor.Components.Icons" Version="6.0.8" />

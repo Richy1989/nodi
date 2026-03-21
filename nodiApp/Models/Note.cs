@@ -1,9 +1,8 @@
+using nodeCommon;
 using SQLite;
 
 namespace nodiApp.Models;
 
-public enum NoteColor { Default, Red, Orange, Yellow, Green, Teal, Blue, DarkBlue, Purple, Pink, Brown, Gray }
-public enum NoteType { Text, Checklist }
 public enum SyncStatus { Synced, PendingCreate, PendingUpdate, PendingDelete }
 
 [Table("Notes")]

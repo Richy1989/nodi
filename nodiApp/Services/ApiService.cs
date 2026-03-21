@@ -2,16 +2,10 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using nodeCommon;
 using nodiApp.Models;
 
 namespace nodiApp.Services;
-
-public record AuthResponse(string Token, int UserId, string Username, string Email, string Role);
-public record ChecklistItemDto(int Id, string Text, bool IsChecked, int Order);
-public record NoteDto(int Id, string Title, string? Content, string Color, string Type,
-    bool IsPinned, bool IsArchived, bool IsDeleted, DateTime CreatedAt, DateTime UpdatedAt,
-    List<ChecklistItemDto> ChecklistItems, List<TagDto> Tags);
-public record TagDto(int Id, string Name, int NoteCount);
 
 public class ApiService
 {

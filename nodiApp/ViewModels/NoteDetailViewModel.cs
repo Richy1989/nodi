@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using nodeCommon;
 using nodiApp.Models;
 using nodiApp.Services;
 
@@ -71,7 +72,7 @@ public partial class NoteDetailViewModel(LocalDbService db) : ObservableObject
                 Title = Title,
                 Content = IsChecklist ? null : Content,
                 Color = Enum.TryParse<NoteColor>(SelectedColor, out var c) ? c : NoteColor.Default,
-                Type = IsChecklist ? Models.NoteType.Checklist : Models.NoteType.Text,
+                Type = IsChecklist ? NoteType.Checklist : NoteType.Text,
                 SyncStatus = SyncStatus.PendingCreate
             };
             await db.SaveNoteAsync(_note);

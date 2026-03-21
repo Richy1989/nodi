@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using nodiCore.Data;
+using nodeCommon;
 using nodiCore.DTOs;
 using nodiCore.Models;
 
