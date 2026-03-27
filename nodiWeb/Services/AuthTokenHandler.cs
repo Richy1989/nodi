@@ -1,3 +1,5 @@
+using System.Net;
+
 namespace nodiWeb.Services;
 
 public class AuthTokenHandler(AuthStateProvider authState) : DelegatingHandler
@@ -9,6 +11,13 @@ public class AuthTokenHandler(AuthStateProvider authState) : DelegatingHandler
         if (!string.IsNullOrEmpty(token))
             request.Headers.Authorization = new("Bearer", token);
 
-        return await base.SendAsync(request, ct);
+        var response = await base.SendAsync(request, ct);
+
+        // Expired or revoked token — clear the session so AuthorizeRouteView
+        // re-evaluates and RedirectToLogin sends the user back to /login.
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+            await authState.SetUserAsync(null);
+
+        return response;
     }
 }

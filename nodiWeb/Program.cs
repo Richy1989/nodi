@@ -25,6 +25,8 @@ builder.Services.AddHttpClient("nodiApi", client =>
 
 // Auth
 builder.Services.AddScoped<ApiService>();
+builder.Services.AddScoped<SearchService>();
+builder.Services.AddScoped<NoteActionsService>();
 builder.Services.AddScoped<AuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(
     sp => sp.GetRequiredService<AuthStateProvider>());

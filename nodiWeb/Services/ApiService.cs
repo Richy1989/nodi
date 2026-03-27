@@ -84,12 +84,20 @@ public class ApiService(IHttpClientFactory httpClientFactory, AuthStateProvider 
         var query = $"api/notes?archived={archived}&deleted={deleted}";
         if (tagId.HasValue) query += $"&tagId={tagId}";
         if (!string.IsNullOrWhiteSpace(search)) query += $"&search={Uri.EscapeDataString(search)}";
-        return await CreateClient().GetFromJsonAsync<List<NoteDto>>(query) ?? [];
+        var response = await CreateClient().GetAsync(query);
+        return response.IsSuccessStatusCode
+            ? await response.Content.ReadFromJsonAsync<List<NoteDto>>() ?? []
+            : [];
     }
 
     /// <summary>Returns a single note by ID, or <c>null</c> if not found.</summary>
-    public async Task<NoteDto?> GetNoteAsync(int id) =>
-        await CreateClient().GetFromJsonAsync<NoteDto>($"api/notes/{id}");
+    public async Task<NoteDto?> GetNoteAsync(int id)
+    {
+        var response = await CreateClient().GetAsync($"api/notes/{id}");
+        return response.IsSuccessStatusCode
+            ? await response.Content.ReadFromJsonAsync<NoteDto>()
+            : null;
+    }
 
     /// <summary>
     /// Creates a new note. The <paramref name="request"/> anonymous object is serialised
@@ -130,8 +138,13 @@ public class ApiService(IHttpClientFactory httpClientFactory, AuthStateProvider 
     // -------------------------------------------------------------------------
 
     /// <summary>Returns all tags belonging to the current user.</summary>
-    public async Task<List<TagDto>> GetTagsAsync() =>
-        await CreateClient().GetFromJsonAsync<List<TagDto>>("api/tags") ?? [];
+    public async Task<List<TagDto>> GetTagsAsync()
+    {
+        var response = await CreateClient().GetAsync("api/tags");
+        return response.IsSuccessStatusCode
+            ? await response.Content.ReadFromJsonAsync<List<TagDto>>() ?? []
+            : [];
+    }
 
     /// <summary>Creates a new tag with the given name. Returns <c>null</c> on failure (e.g. duplicate).</summary>
     public async Task<TagDto?> CreateTagAsync(string name)
@@ -149,8 +162,13 @@ public class ApiService(IHttpClientFactory httpClientFactory, AuthStateProvider 
     // -------------------------------------------------------------------------
 
     /// <summary>Returns all registered users. Admin only.</summary>
-    public async Task<List<UserDto>> GetUsersAsync() =>
-        await CreateClient().GetFromJsonAsync<List<UserDto>>("api/admin/users") ?? [];
+    public async Task<List<UserDto>> GetUsersAsync()
+    {
+        var response = await CreateClient().GetAsync("api/admin/users");
+        return response.IsSuccessStatusCode
+            ? await response.Content.ReadFromJsonAsync<List<UserDto>>() ?? []
+            : [];
+    }
 
     /// <summary>Updates a user's details (e.g. role, email). Admin only.</summary>
     public async Task<bool> UpdateUserAsync(int id, object request) =>
@@ -164,8 +182,13 @@ public class ApiService(IHttpClientFactory httpClientFactory, AuthStateProvider 
     /// Returns all app-wide settings (e.g. <c>RegistrationOpen</c>).
     /// These are stored in the AppSettings table in nodiCore. Admin only.
     /// </summary>
-    public async Task<List<AppSettingDto>> GetSettingsAsync() =>
-        await CreateClient().GetFromJsonAsync<List<AppSettingDto>>("api/admin/settings") ?? [];
+    public async Task<List<AppSettingDto>> GetSettingsAsync()
+    {
+        var response = await CreateClient().GetAsync("api/admin/settings");
+        return response.IsSuccessStatusCode
+            ? await response.Content.ReadFromJsonAsync<List<AppSettingDto>>() ?? []
+            : [];
+    }
 
     /// <summary>Persists a batch of app settings in one request. Admin only.</summary>
     public async Task<bool> UpdateSettingsAsync(List<AppSettingDto> settings) =>

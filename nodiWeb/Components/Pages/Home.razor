@@ -2,21 +2,11 @@
 @attribute [Authorize]
 @inject ApiService Api
 @inject IDialogService DialogService
+@inject SearchService Search
+@inject NoteActionsService NoteActions
+@implements IDisposable
 
 <PageTitle>Notes - nodi</PageTitle>
-
-<div class="d-flex align-center gap-3 mb-6 flex-wrap">
-    <MudTextField T="string" Value="@searchTerm" Placeholder="Search notes..."
-                  Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search"
-                  Variant="Variant.Outlined" Margin="Margin.Dense" Immediate="true"
-                  ValueChanged="@((string s) => OnSearch(s))"
-                  Style="max-width:360px; flex:1;" />
-    <MudSpacer />
-    <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.NoteAdd"
-               OnClick='() => OpenEditor("Text")'>Text Note</MudButton>
-    <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Checklist"
-               OnClick='() => OpenEditor("Checklist")'>Checklist</MudButton>
-</div>
 
 @if (loading)
 {
@@ -64,10 +54,22 @@ else
     private List<NoteDto> allNotes = [];
     private List<NoteDto> pinnedNotes = [];
     private List<NoteDto> unpinnedNotes = [];
-    private string searchTerm = string.Empty;
+    private string? currentSearch;
     private bool loading = true;
 
-    protected override async Task OnInitializedAsync() => await LoadNotes();
+    protected override async Task OnInitializedAsync()
+    {
+        Search.OnSearch += HandleSearch;
+        NoteActions.OnOpenEditor += HandleOpenEditor;
+        await LoadNotes();
+    }
+
+    private async void HandleSearch(string? term)
+    {
+        currentSearch = term;
+        await LoadNotes(term);
+        StateHasChanged();
+    }
 
     private async Task LoadNotes(string? search = null)
     {
@@ -78,10 +80,16 @@ else
         loading = false;
     }
 
-    private async Task OnSearch(string value)
+    public void Dispose()
     {
-        searchTerm = value;
-        await LoadNotes(string.IsNullOrWhiteSpace(value) ? null : value);
+        Search.OnSearch -= HandleSearch;
+        NoteActions.OnOpenEditor -= HandleOpenEditor;
+    }
+
+    private async void HandleOpenEditor(string type)
+    {
+        await OpenEditor(type);
+        StateHasChanged();
     }
 
     private async Task OpenEditor(string type)

@@ -60,7 +60,7 @@
     background: rgba(255,255,255,.09);
 }
 .icon-btn-active {
-    color: #a78bfa !important;
+    color: #fbbf24 !important;
 }
 .icon-btn-danger:hover {
     color: #f87171 !important;
@@ -102,32 +102,32 @@
 .sidebar-brand {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 16px 14px 14px;
+    gap: 12px;
+    padding: 22px 18px 18px;
     border-bottom: 1px solid rgba(255,255,255,.06);
-    margin-bottom: 4px;
+    margin-bottom: 6px;
 }
 
 /* Placeholder box — remove once a real logo image is in place */
 .sidebar-logo-placeholder {
-    width: 28px;
-    height: 28px;
-    border-radius: 7px;
-    background: #a78bfa;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    background: #fbbf24;
     flex-shrink: 0;
 }
 
 /* Actual logo image — sized to match the placeholder */
 .sidebar-logo {
-    width: 28px;
-    height: 28px;
-    border-radius: 7px;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
     object-fit: contain;
     flex-shrink: 0;
 }
 
 .sidebar-brand-name {
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-weight: 700;
     letter-spacing: .3px;
     color: #f4f4f5;
@@ -137,20 +137,20 @@
 .sidebar-nav {
     display: flex;
     flex-direction: column;
-    padding: .5rem 0;
-    gap: 1px;
+    padding: .6rem 0;
+    gap: 2px;
 }
 
 .sidebar-link {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 7px 14px;
-    margin: 0 8px;
-    border-radius: 7px;
+    gap: 12px;
+    padding: 10px 16px;
+    margin: 0 10px;
+    border-radius: 9px;
     color: #a1a1aa;
     text-decoration: none;
-    font-size: .875rem;
+    font-size: .95rem;
     font-weight: 500;
     transition: background .12s, color .12s;
 }
@@ -159,11 +159,11 @@
     color: #e4e4e7;
 }
 .sidebar-link.active {
-    background: rgba(167,139,250,.14);
-    color: #a78bfa;
+    background: rgba(251,191,36,.15);
+    color: #fbbf24;
 }
 .sidebar-icon {
-    font-size: 16px;
+    font-size: 18px;
     display: inline-flex;
     align-items: center;
     flex-shrink: 0;
@@ -171,43 +171,88 @@
 .sidebar-divider {
     height: 1px;
     background: rgba(255,255,255,.07);
-    margin: 6px 16px;
+    margin: 8px 18px;
     border: none;
 }
 
 /* ─── AppBar ─────────────────────────────────────────────────────────────── */
+.appbar-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-right: 4px;
+}
+
+.appbar-action-btn.mud-icon-button {
+    width: 36px;
+    height: 36px;
+    min-width: unset;
+    padding: 0;
+    background: rgba(251, 191, 36, 0.12);
+    color: #fbbf24;
+    border-radius: 50%;
+    transition: background .15s, color .15s;
+}
+.appbar-action-btn.mud-icon-button:hover {
+    background: rgba(251, 191, 36, 0.25);
+    color: #fde68a;
+}
+
 .appbar-icon-btn {
     background: none;
     border: none;
     cursor: pointer;
-    padding: 6px 8px;
-    border-radius: 6px;
+    padding: 8px 10px;
+    border-radius: 8px;
     color: rgba(255,255,255,.75);
-    font-size: 18px;
+    font-size: 20px;
     display: inline-flex;
     align-items: center;
     transition: color .12s, background .12s;
-    margin-right: 4px;
+    margin-right: 6px;
 }
 .appbar-icon-btn:hover {
     background: rgba(255,255,255,.08);
     color: #f4f4f5;
 }
 .appbar-title {
-    font-size: .9rem;
+    font-size: .95rem;
     font-weight: 700;
     letter-spacing: .5px;
     color: rgba(255,255,255,.85);
 }
 
+.search-field {
+    align-self: center !important;
+    height: 38px !important;
+}
+
+.search-field .mud-input-control {
+    height: 38px;
+    margin: 0 !important;
+}
+
+.search-field .mud-input-outlined,
+.search-field .mud-input-outlined-border {
+    border-radius: 999px !important;
+    height: 38px;
+}
+
+.search-field input {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    height: 100% !important;
+    min-height: unset !important;
+}
+
 /* ─── User menu ──────────────────────────────────────────────────────────── */
 .user-avatar-btn {
-    width: 30px;
-    height: 30px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    background: #a78bfa;
+    background: #fbbf24;
     color: #fff;
-    font-size: .7rem;
+    font-size: .75rem;
     font-weight: 700;
     display: flex;
     align-items: center;

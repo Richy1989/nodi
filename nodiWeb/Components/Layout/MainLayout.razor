@@ -1,5 +1,7 @@
 @inherits LayoutComponentBase
 @inject AuthStateProvider AuthState
+@inject SearchService Search
+@inject NoteActionsService NoteActions
 
 <MudThemeProvider Theme="_theme" IsDarkMode="true" />
 <MudPopoverProvider />
@@ -9,25 +11,46 @@
 @if (AuthState.CurrentUser is not null)
 {
     <MudLayout>
-        <MudAppBar Elevation="0" Dense="true"
+        <MudAppBar Elevation="0"
                    Style="border-bottom:1px solid rgba(255,255,255,.06);">
             <button class="appbar-icon-btn" @onclick="() => _drawerOpen = !_drawerOpen"
                     title="Toggle sidebar">
                 <Blazicon Svg="Lucide.PanelLeft" />
             </button>
-            <MudSpacer />
-            <UserMenu />
-            <div style="width:6px;" />
+            <MudTextField ShrinkLabel T="string"
+                          Value="@searchTerm"
+                          Placeholder="Search notes..."
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Immediate="true"
+                          ValueChanged="@((string s) => OnSearch(s))"
+                          Class="search-field px-3"/>
+            
+             <div class="appbar-right">
+                <MudTooltip Text="New note">
+                    <MudIconButton Icon="@Icons.Material.Filled.Add"
+                                   OnClick='() => NoteActions.OpenEditor("Text")'
+                                   Class="appbar-action-btn" />
+                </MudTooltip>
+                <MudTooltip Text="New checklist">
+                    <MudIconButton Icon="@Icons.Material.Filled.PlaylistAddCheck"
+                                   OnClick='() => NoteActions.OpenEditor("Checklist")'
+                                   Class="appbar-action-btn" />
+                </MudTooltip>
+                <UserMenu />
+            </div>
         </MudAppBar>
 
         <MudDrawer @bind-Open="_drawerOpen" Variant="DrawerVariant.Responsive"
-                   Elevation="0" Width="210px"
+                   Elevation="0" Width="240px"
                    Style="border-right:1px solid rgba(255,255,255,.06);">
             <NavMenu />
         </MudDrawer>
 
         <MudMainContent>
-            <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-6 pt-7">
+            <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-8">
                 @Body
             </MudContainer>
         </MudMainContent>
@@ -40,6 +63,13 @@ else
 
 @code {
     private bool _drawerOpen = true;
+    
+    private string searchTerm = string.Empty;
+    private void OnSearch(string value)
+    {
+        searchTerm = value;
+        Search.Search(string.IsNullOrWhiteSpace(value) ? null : value);
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -79,8 +109,8 @@ else
         },
         PaletteDark = new PaletteDark()
         {
-            Primary          = "#a78bfa",   // violet-400
-            Secondary        = "#60a5fa",   // blue-400
+            Primary          = "#fbbf24",   // amber-400
+            Secondary        = "#34d399",   // emerald-400
             Background       = "#18181b",   // zinc-900
             Surface          = "#27272a",   // zinc-800
             DrawerBackground = "#111115",
