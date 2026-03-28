@@ -1,12 +1,15 @@
 @page "/"
-@attribute [Authorize]                                          @* Redirect to /login if not authenticated *@
-@rendermode @(new InteractiveServerRenderMode(prerender: false))@* Blazor Server, prerender off to avoid double-init *@
+@* Redirect to /login if not authenticated *@
+@attribute [Authorize]                               
+@* Blazor Server, prerender off to avoid double-init *@
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 @inject ApiService Api
 @inject IDialogService DialogService
 @inject SearchService Search
 @inject NoteActionsService NoteActions
 @inject IJSRuntime JS
-@implements IDisposable                                         @* Needed to unsubscribe from events on teardown *@
+@* Needed to unsubscribe from events on teardown *@
+@implements IDisposable                                         
 
 <PageTitle>Notes - nodi</PageTitle>
 

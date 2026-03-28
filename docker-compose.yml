@@ -1,0 +1,34 @@
+# Local run for nodi — single combined container.
+# Usage: docker compose up --build
+#
+# Copy .env.example to .env and fill in secrets before running.
+
+services:
+
+  nodi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: nodi:latest
+    container_name: nodi
+    restart: unless-stopped
+    ports:
+      # Only the web port needs to be mapped — core is internal to the container
+      - "${WEB_PORT:-8080}:${WEB_PORT:-8080}"
+    volumes:
+      # SQLite database and persistent files
+      - nodi-data:/app/data
+    environment:
+      - CORE_PORT=${CORE_PORT:-5100}
+      - WEB_PORT=${WEB_PORT:-8080}
+      - Database__Provider=sqlite
+      - Jwt__Key=${JWT_KEY}
+      - Jwt__Issuer=nodiCore
+      - Jwt__Audience=nodiClients
+      - Jwt__ExpiryHours=72
+      - Admin__Username=${ADMIN_USERNAME:-admin}
+      - Admin__Email=${ADMIN_EMAIL:-admin@nodi.local}
+      - Admin__Password=${ADMIN_PASSWORD}
+
+volumes:
+  nodi-data:

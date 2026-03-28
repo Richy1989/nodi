@@ -63,6 +63,7 @@ programData/
 **/appsettings.Local.json
 **/appsettings.*.Local.json
 secrets.json
+.env
 
 # ========================
 # MSBuild / Test results
