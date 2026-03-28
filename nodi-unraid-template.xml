@@ -15,7 +15,7 @@ A self-hosted, multi-platform note-taking app. Create text and checklist notes, 
   <Icon>https://raw.githubusercontent.com/richy1989/nodi/main/nodiWeb/wwwroot/favicon.png</Icon>
   <Project>https://github.com/richy1989/nodi</Project>
   <Support>https://github.com/richy1989/nodi/issues</Support>
-  <TemplateURL>https://raw.githubusercontent.com/richy1989/nodi/main/unraid/nodi-unraid-template.xml</TemplateURL>
+  <TemplateURL>https://raw.githubusercontent.com/Richy1989/nodi/main/nodi-unraid-template.xml</TemplateURL>
 
   <Config
     Name="Web UI Port"
