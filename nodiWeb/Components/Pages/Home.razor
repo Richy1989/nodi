@@ -1,14 +1,17 @@
 @page "/"
-@attribute [Authorize]
-@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@attribute [Authorize]                                          @* Redirect to /login if not authenticated *@
+@rendermode @(new InteractiveServerRenderMode(prerender: false))@* Blazor Server, prerender off to avoid double-init *@
 @inject ApiService Api
 @inject IDialogService DialogService
 @inject SearchService Search
 @inject NoteActionsService NoteActions
 @inject IJSRuntime JS
-@implements IDisposable
+@implements IDisposable                                         @* Needed to unsubscribe from events on teardown *@
 
 <PageTitle>Notes - nodi</PageTitle>
+
+@* ── Inline note composer ─────────────────────────────────────────────────── *@
+@* Toggles between a collapsed "Write a note..." bar and an expanded form *@
 
 @if (_expanded)
 {
@@ -19,6 +22,7 @@
         <textarea class="composer-content" placeholder="Take a note..."
                   @bind="_newContent" @bind:event="oninput" rows="3"></textarea>
 
+        @* Checklist items — only shown when at least one item has been added *@
         @if (_newItems.Count > 0)
         {
             <div class="composer-items">
@@ -29,6 +33,7 @@
                         <input type="checkbox" class="composer-checkbox"
                                checked="@_newItems[idx].IsChecked"
                                @onchange="e => _newItems[idx].IsChecked = (bool)(e.Value ?? false)" />
+                        @* id="new-item-{idx}" lets OnAfterRenderAsync focus the right input after Enter *@
                         <input id="new-item-@idx" class="composer-item-text" placeholder="List item"
                                @bind="_newItems[idx].Text" @bind:event="oninput"
                                @onkeydown="e => HandleNewItemKeyDown(e, idx)" />
@@ -41,6 +46,7 @@
         }
 
         <div class="composer-footer">
+            @* Color picker — dots styled per note-color-{name} CSS classes *@
             <div class="composer-colors">
                 @foreach (var color in _colors)
                 {
@@ -61,6 +67,8 @@
 }
 else
 {
+    @* Collapsed state — clicking anywhere expands the composer *@
+    @* stopPropagation on the actions div prevents the button click from also firing the parent onclick *@
     <div class="quick-add" @onclick="ExpandEditor">
         <span class="quick-add-placeholder">Write a note...</span>
         <div class="quick-add-actions" @onclick:stopPropagation="true">
@@ -70,6 +78,8 @@ else
         </div>
     </div>
 }
+
+@* ── Notes grid ───────────────────────────────────────────────────────────── *@
 
 @if (loading)
 {
@@ -86,6 +96,7 @@ else if (allNotes.Count == 0)
 }
 else
 {
+    @* Pinned notes render in their own masonry grid above a divider *@
     @if (pinnedNotes.Count > 0)
     {
         <MudText Typo="Typo.overline" Color="Color.Secondary" Class="mb-2">Pinned</MudText>
@@ -126,7 +137,8 @@ else
     private string? _newContent;
     private string  _newColor  = "Default";
     private List<ItemModel> _newItems = [];
-    private int     _focusItemIdx = -1;
+    // -1 means no pending focus; set to an item index to focus that input after the next render
+    private int _focusItemIdx = -1;
 
     private static readonly string[] _colors =
         ["Default", "Salmon", "Peach", "LightYellow", "Mint", "Cyan",
@@ -140,8 +152,10 @@ else
     }
 
     // ── Lifecycle ──────────────────────────────────────────────────────────
+
     protected override async Task OnInitializedAsync()
     {
+        // Subscribe to cross-component events
         Search.OnSearch            += HandleSearch;
         NoteActions.OnExpandEditor += HandleExpandEditor;
         await LoadNotes();
@@ -149,39 +163,61 @@ else
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (_focusItemIdx >= 0)
+        // JSDisconnectedException is caught here because the SignalR circuit can drop
+        // momentarily (e.g. tab move, network hiccup) while a render is in flight.
+        // Without the catch the exception would propagate and crash the server process.
+        try
         {
-            await JS.InvokeVoidAsync("nodi.focusById", $"new-item-{_focusItemIdx}");
-            _focusItemIdx = -1;
+            // Focus the newly inserted checklist item if Enter was pressed
+            if (_focusItemIdx >= 0)
+            {
+                await JS.InvokeVoidAsync("nodi.focusById", $"new-item-{_focusItemIdx}");
+                _focusItemIdx = -1;
+            }
+            // Re-init masonry layout after every render that has notes visible
+            if (!loading && allNotes.Count > 0)
+                await JS.InvokeVoidAsync("masonry.init", ".notes-masonry");
         }
-        if (!loading && allNotes.Count > 0)
-            await JS.InvokeVoidAsync("masonry.init", ".notes-masonry");
+        catch (JSDisconnectedException) { }
     }
 
     public void Dispose()
     {
-        Search.OnSearch          -= HandleSearch;
+        // Unsubscribe to prevent memory leaks and stale callbacks after the circuit closes
+        Search.OnSearch            -= HandleSearch;
         NoteActions.OnExpandEditor -= HandleExpandEditor;
     }
 
     // ── Search ─────────────────────────────────────────────────────────────
+
+    // async void is required by the event delegate signature.
+    // All exceptions must be caught internally — an unhandled exception in async void
+    // bypasses the ASP.NET Core pipeline and crashes the server process with exit code -1.
     private async void HandleSearch(string? term)
     {
-        currentSearch = term;
-        await LoadNotes(term);
-        StateHasChanged();
+        try
+        {
+            currentSearch = term;
+            await LoadNotes(term);
+            StateHasChanged();
+        }
+        catch (ObjectDisposedException) { } // Circuit was disposed before the await completed
+        catch (Exception) { }
     }
 
     private async Task LoadNotes(string? search = null)
     {
-        loading      = true;
-        allNotes     = await Api.GetNotesAsync(search: search);
-        pinnedNotes  = allNotes.Where(n => n.IsPinned).ToList();
+        loading       = true;
+        allNotes      = await Api.GetNotesAsync(search: search);
+        pinnedNotes   = allNotes.Where(n => n.IsPinned).ToList();
         unpinnedNotes = allNotes.Where(n => !n.IsPinned).ToList();
-        loading      = false;
+        loading       = false;
     }
 
     // ── Inline composer ────────────────────────────────────────────────────
+
+    // Called from NoteActionsService (e.g. toolbar button) — needs StateHasChanged
+    // because the call comes from outside the Blazor render cycle
     private void HandleExpandEditor()
     {
         ExpandEditor();
@@ -197,10 +233,12 @@ else
         _newItems   = [];
     }
 
+    // Enter on a checklist item inserts a new item below it and queues focus on it
     private void HandleNewItemKeyDown(KeyboardEventArgs e, int idx)
     {
         if (e.Key != "Enter") return;
         _newItems.Insert(idx + 1, new() { Order = idx + 1 });
+        // Rewrite Order to keep indices contiguous
         for (int i = 0; i < _newItems.Count; i++) _newItems[i].Order = i;
         _focusItemIdx = idx + 1;
     }
@@ -231,6 +269,9 @@ else
     }
 
     // ── Edit existing note (dialog) ────────────────────────────────────────
+
+    // Opens NoteEditor as a MudBlazor dialog, passing the note as a parameter.
+    // Waits for the dialog to close, then processes the save if not cancelled.
     private async Task EditNote(NoteDto note)
     {
         var parameters = new DialogParameters<NoteEditor> { { x => x.ExistingNote, note } };
@@ -242,6 +283,7 @@ else
 
     private async Task ProcessSave(NoteDto existing, SaveNoteArgs args)
     {
+        // Don't save if the note is now empty
         if (string.IsNullOrWhiteSpace(args.Title) && string.IsNullOrWhiteSpace(args.Content) && args.Items.Count == 0)
             return;
 
@@ -257,6 +299,7 @@ else
     }
 
     // ── Note actions ───────────────────────────────────────────────────────
+
     private async Task TogglePin(NoteDto note)
     {
         await Api.UpdateNoteAsync(note.Id, new { isPinned = !note.IsPinned });

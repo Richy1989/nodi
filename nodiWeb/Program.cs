@@ -8,7 +8,10 @@ using nodiWeb.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+    .AddInteractiveServerComponents(options =>
+    {
+        options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(5);
+    });
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddMudServices();

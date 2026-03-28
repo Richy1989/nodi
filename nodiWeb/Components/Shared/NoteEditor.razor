@@ -1,3 +1,5 @@
+@* Dialog component for editing an existing note.
+   Opened by Home.razor via IDialogService; returns a SaveNoteArgs on save. *@
 @inject IJSRuntime JS
 
 <MudDialog>
@@ -11,6 +13,7 @@
                       Variant="Variant.Text" Lines="4" AutoGrow="true"
                       DisableUnderLine="true" FullWidth="true" Class="mb-2" />
 
+        @* Checklist items — divider only shown when there are items *@
         @if (items.Count > 0)
         {
             <MudDivider Class="mb-2" />
@@ -23,6 +26,8 @@
                 <MudCheckBox T="bool" Value="@items[idx].IsChecked"
                              ValueChanged="@((bool v) => items[idx].IsChecked = v)"
                              Size="Size.Small" Color="Color.Primary" />
+                @* Plain <input> used (not MudTextField) so we can set id directly on the element
+                   for JS focus after Enter. id="edit-item-{idx}" matches nodi.focusById calls. *@
                 <input id="edit-item-@idx" class="composer-item-text" placeholder="List item"
                        @bind="items[idx].Text" @bind:event="oninput"
                        @onkeydown="e => HandleItemKeyDown(e, idx)" />
@@ -36,6 +41,7 @@
 
         <MudDivider Class="my-3" />
 
+        @* Color picker — dots styled per note-color-{name} CSS classes in app.css *@
         <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-2">Color</MudText>
         <div class="d-flex flex-wrap gap-2" style="padding-bottom:5px;">
             @foreach (var color in Colors)
@@ -58,8 +64,10 @@
     private static readonly string[] Colors = ["Default", "Salmon", "Peach", "LightYellow", "Mint", "Cyan", "SkyBlue", "CornflowerBlue", "Lavender", "HotPink", "Tan", "Silver"];
     private EditModel editNote = new();
     private List<ItemModel> items = [];
+    // -1 means no pending focus; set to an item index to focus that input after the next render
     private int _focusItemIdx = -1;
 
+    // Runs every time the dialog is opened or ExistingNote changes
     protected override void OnParametersSet()
     {
         if (ExistingNote is not null)
@@ -83,17 +91,25 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (_focusItemIdx >= 0)
+        // JSDisconnectedException can occur if the SignalR circuit drops mid-render.
+        // Catching it here prevents the exception from crashing the server process.
+        try
         {
-            await JS.InvokeVoidAsync("nodi.focusById", $"edit-item-{_focusItemIdx}");
-            _focusItemIdx = -1;
+            if (_focusItemIdx >= 0)
+            {
+                await JS.InvokeVoidAsync("nodi.focusById", $"edit-item-{_focusItemIdx}");
+                _focusItemIdx = -1;
+            }
         }
+        catch (JSDisconnectedException) { }
     }
 
+    // Enter on a checklist item inserts a new item below it and queues focus on it
     private void HandleItemKeyDown(KeyboardEventArgs e, int idx)
     {
         if (e.Key != "Enter") return;
         items.Insert(idx + 1, new ItemModel { Order = idx + 1 });
+        // Rewrite Order to keep indices contiguous
         for (int i = 0; i < items.Count; i++) items[i].Order = i;
         _focusItemIdx = idx + 1;
     }
@@ -102,6 +118,7 @@
     private void RemoveItem(int idx) => items.RemoveAt(idx);
     private void Cancel() => MudDialog.Cancel();
 
+    // Closes the dialog and passes the edited data back to Home.razor via SaveNoteArgs
     private void Save()
     {
         var type = items.Count > 0 ? "Checklist" : "Text";

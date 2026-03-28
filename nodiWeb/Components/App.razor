@@ -22,7 +22,18 @@
     <Routes @rendermode="InteractiveServer" />
     <ReconnectModal />
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
-    <script src="@Assets["_framework/blazor.web.js"]"></script>
+    <script src="@Assets["_framework/blazor.web.js"]" autostart="false"></script>
+    <script>
+        Blazor.start({
+            circuit: {
+                reconnectionOptions: {
+                    maxRetries: 30,
+                    retryIntervalMilliseconds: (attempt, max) =>
+                        attempt >= max ? null : Math.min(attempt * 1000, 5000)
+                }
+            }
+        });
+    </script>
     <script src="js/nodi.js"></script>
     <script src="js/masonry.js"></script>
 </body>
