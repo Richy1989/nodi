@@ -1,4 +1,4 @@
-<MudCard Class="@($"note-color-{Note.Color.ToLower()} note-card h-100")" Elevation="2"
+<MudCard Class="@($"note-color-{Note.Color.ToLower()} note-card")" Elevation="2"
          @onclick="() => OnClick.InvokeAsync(Note)" style="cursor:pointer;">
     <MudCardHeader Class="pb-0">
         <CardHeaderContent>
@@ -31,7 +31,7 @@
     <MudCardContent Class="pt-1 pb-1 flex-grow-1">
         
         <MudText Typo="Typo.body1" Class="mb-3"
-                 Style="white-space:pre-wrap; overflow:hidden; display:-webkit-box; -webkit-line-clamp:8; -webkit-box-orient:vertical;">
+                 Style="white-space:pre-wrap; word-break:break-word; overflow-wrap:break-word; overflow:hidden; display:-webkit-box; -webkit-line-clamp:8; -webkit-box-orient:vertical;">
             @Note.Content
         </MudText>
 
