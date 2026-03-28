@@ -44,6 +44,11 @@ ScaffoldingReadMe.txt
 nuget.config
 
 # ========================
+# Data folder (SQLite DB, uploads, etc.)
+# ========================
+programData/
+
+# ========================
 # Database files
 # ========================
 *.db

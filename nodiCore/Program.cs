@@ -7,6 +7,12 @@ using nodiCore.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ── Configuration service ─────────────────────────────────────────────────────
+// Instantiated early so Program.cs can use DataFolder before the DI container
+// is built. The same instance is registered as the singleton below.
+var appConfig = new ConfigurationService(builder.Configuration);
+Directory.CreateDirectory(appConfig.DataFolder);
+
 // ── Database ──────────────────────────────────────────────────────────────────
 // Supports SQLite (default, for local/dev) or PostgreSQL (for production).
 // Set Database:Provider = "postgresql" in appsettings to switch providers.
@@ -18,8 +24,10 @@ if (dbProvider.Equals("postgresql", StringComparison.OrdinalIgnoreCase))
 }
 else
 {
+    // Place the SQLite file inside the data folder instead of the working directory.
+    var sqlitePath = Path.Combine(appConfig.DataFolder, "nodi.db");
     builder.Services.AddDbContext<AppDbContext>(options =>
-        options.UseSqlite(builder.Configuration.GetConnectionString("SQLite") ?? "Data Source=nodi.db"));
+        options.UseSqlite($"Data Source={sqlitePath}"));
 }
 
 // ── JWT Authentication ────────────────────────────────────────────────────────
@@ -62,6 +70,11 @@ builder.Services.AddScoped<TagService>();
 builder.Services.AddScoped<SettingsService>();
 builder.Services.AddScoped<UserSettingsService>();
 
+// ── Configuration singleton ───────────────────────────────────────────────────
+// Register the instance created above so injected services get the same object.
+builder.Services.AddSingleton(appConfig);
+
+
 // ── CORS ──────────────────────────────────────────────────────────────────────
 // Open policy allows nodiWeb and nodiApp to call the API from any origin.
 // Tighten this in production if the deployment origin is known.
@@ -74,16 +87,11 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // ── Database initialisation ───────────────────────────────────────────────────
-// EnsureCreated creates the schema on first run but does not run migrations.
-// The ALTER TABLE below is a manual migration to add the Theme column to
-// existing SQLite databases that were created before this column was introduced.
+// EnsureCreated creates the schema on first run if the database doesn't exist yet.
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.EnsureCreated();
-    // Gracefully add new columns to existing SQLite databases (EnsureCreated won't migrate)
-    try { db.Database.ExecuteSqlRaw("ALTER TABLE Users ADD COLUMN Theme TEXT NOT NULL DEFAULT 'Dark'"); }
-    catch { /* column already exists */ }
     await DbSeeder.SeedAsync(db, builder.Configuration);
 }
 

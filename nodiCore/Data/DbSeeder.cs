@@ -15,8 +15,6 @@ public static class DbSeeder
     /// </summary>
     public static async Task SeedAsync(AppDbContext db, IConfiguration config)
     {
-        await db.Database.EnsureCreatedAsync();
-
         // Seed default app settings only on a fresh database.
         if (!db.AppSettings.Any())
         {
