@@ -26,7 +26,7 @@ RUN dotnet restore nodiWeb/nodiWeb.csproj
 
 COPY nodeCommon/ nodeCommon/
 COPY nodiWeb/    nodiWeb/
-RUN dotnet publish nodiWeb/nodiWeb.csproj -c Release -o /app/web --no-restore
+RUN dotnet publish nodiWeb/nodiWeb.csproj -c Release -o /app/web
 
 # ── Stage 3: runtime ──────────────────────────────────────────────────────────
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime

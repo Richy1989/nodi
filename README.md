@@ -131,19 +131,84 @@ All values can be overridden via environment variables
 
 ---
 
-## 🐳 Docker (Minimal Production Example)
+## 🐳 Docker
+
+nodi ships as a **single combined image**. Both the API (`nodiCore`) and the web app (`nodiWeb`) run inside one container managed by `supervisord`. Only the web port is exposed to the host — the API stays internal.
+
+```
+┌─────────────────────────────────┐
+│  nodi container                 │
+│                                 │
+│  nodiWeb  :8080  ───────────────────► browser
+│      │                          │
+│  nodiCore :5100  (internal)     │
+│      │                          │
+│  /app/data  (SQLite + files)    │
+└─────────────────────────────────┘
+```
+
+### Quick start
 
 ```bash
-docker run \
-  -e DataFolder=/data \
-  -e Database__Provider=postgresql \
-  -e ConnectionStrings__PostgreSQL="Host=db;Database=nodi;Username=nodi;Password=secret" \
+docker run -d \
   -e Jwt__Key="replace-with-a-long-random-secret-at-least-32-chars" \
   -e Admin__Password="replace-with-a-strong-password" \
-  -v /host/nodi-data:/data \
-  -p 5100:5100 \
-  nodicore
+  -v /host/nodi-data:/app/data \
+  -p 8080:8080 \
+  richy1989/nodi
 ```
+
+Web app available at `http://localhost:8080`.
+
+### Docker Compose
+
+Copy `.env.example` to `.env` and fill in the required values, then:
+
+```bash
+docker compose up
+```
+
+### Build and push
+
+```powershell
+# Requires: Docker Desktop, docker login
+
+# Build and push as latest
+.\build.ps1 -Username yourname
+
+# Build with a version tag (also tag as latest separately if needed)
+.\build.ps1 -Username yourname -Tag 1.0.0
+
+# Build locally without pushing
+.\build.ps1 -Username yourname -NoPush
+```
+
+### Run on Unraid
+
+1. **Docker → Add Container**, set repository to `richy1989/nodi`
+2. Add a **Port** mapping: host `8080` → container `8080`
+3. Add a **Path** mapping: host `/mnt/user/appdata/nodi` → container `/app/data`
+4. Add the required environment variables (see table above)
+5. Click **Apply**
+
+The API port (`CORE_PORT`) does **not** need to be mapped — it never leaves the container.
+
+### Environment variables (Docker)
+
+| Variable | Default | Description |
+|---|---|---|
+| `Jwt__Key` | *(required)* | Secret for signing tokens — min 32 characters |
+| `Admin__Password` | `Admin1234!` | Seeded admin password — **change this** |
+| `Admin__Username` | `admin` | Seeded admin username |
+| `Admin__Email` | `admin@nodi.local` | Seeded admin email |
+| `WEB_PORT` | `8080` | Port the web app listens on |
+| `CORE_PORT` | `5100` | Internal API port — no host mapping needed |
+| `Database__Provider` | `sqlite` | `sqlite` or `postgresql` |
+| `ConnectionStrings__PostgreSQL` | — | Required when using PostgreSQL |
+
+### Data persistence
+
+All persistent files (SQLite database, uploads) live at `/app/data` inside the container. Mount a volume or host path there to keep data across container recreations.
 
 ---
 
