@@ -72,7 +72,7 @@ dotnet build -t:Run -f net10.0-windows10.0.19041.0  # Windows
 
 | Environment variable | appsettings.json key | Default | Description |
 |---|---|---|---|
-| `DataFolder` | `DataFolder` | `data` | Directory where all persistent files are stored (SQLite database, future uploads, etc.). Relative paths are resolved from the working directory. |
+| `DataFolder` | `DataFolder` | `programData` | Directory where all persistent files are stored (SQLite database, future uploads, etc.). Relative paths are resolved from the working directory. |
 | `Database__Provider` | `Database:Provider` | `sqlite` | Database backend. Use `sqlite` for local/dev or `postgresql` for production. |
 | `ConnectionStrings__PostgreSQL` | `ConnectionStrings:PostgreSQL` | — | PostgreSQL connection string. Required when `Database__Provider` is `postgresql`. |
 | `Jwt__Key` | `Jwt:Key` | *(none — required)* | Secret key used to sign JWT tokens. Must be at least 32 characters. **Change this before deploying.** |
@@ -101,4 +101,4 @@ docker run \
 
 ### SQLite (local / dev)
 
-No configuration needed. The database is created at `data/nodi.db` relative to the working directory on first run.
+No configuration needed. The database is created at `programData/nodi.db` relative to the working directory on first run.
