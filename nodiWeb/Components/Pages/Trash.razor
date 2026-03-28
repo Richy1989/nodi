@@ -1,5 +1,6 @@
 @page "/trash"
 @attribute [Authorize]
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 @inject ApiService Api
 
 <PageTitle>Trash - nodi</PageTitle>

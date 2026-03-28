@@ -1,5 +1,6 @@
 @page "/"
 @attribute [Authorize]
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 @inject ApiService Api
 @inject IDialogService DialogService
 @inject SearchService Search
@@ -7,6 +8,66 @@
 @implements IDisposable
 
 <PageTitle>Notes - nodi</PageTitle>
+
+@if (_expanded)
+{
+    <div class="composer">
+        <input class="composer-title" placeholder="Title"
+               @bind="_newTitle" @bind:event="oninput" />
+
+        <textarea class="composer-content" placeholder="Take a note..."
+                  @bind="_newContent" @bind:event="oninput" rows="3"></textarea>
+
+        @if (_newItems.Count > 0)
+        {
+            <div class="composer-items">
+                @for (int i = 0; i < _newItems.Count; i++)
+                {
+                    var idx = i;
+                    <div class="composer-item-row">
+                        <input type="checkbox" class="composer-checkbox"
+                               checked="@_newItems[idx].IsChecked"
+                               @onchange="e => _newItems[idx].IsChecked = (bool)(e.Value ?? false)" />
+                        <input class="composer-item-text" placeholder="List item"
+                               @bind="_newItems[idx].Text" @bind:event="oninput" />
+                        <button class="composer-remove-btn" @onclick="() => _newItems.RemoveAt(idx)">
+                            <MudIcon Icon="@Icons.Material.Filled.Close" Style="font-size:16px;" />
+                        </button>
+                    </div>
+                }
+            </div>
+        }
+
+        <div class="composer-footer">
+            <div class="composer-colors">
+                @foreach (var color in _colors)
+                {
+                    <div class="color-dot note-color-@color.ToLower() @(_newColor == color ? "color-selected" : "")"
+                         @onclick="() => _newColor = color"></div>
+                }
+            </div>
+            <div class="composer-footer-actions">
+                <button class="composer-add-item-btn" @onclick="() => _newItems.Add(new() { Order = _newItems.Count })">
+                    <MudIcon Icon="@Icons.Material.Outlined.CheckBox" Style="font-size:18px;" />
+                    Add item
+                </button>
+                <button class="composer-close-btn" @onclick="CancelInline">Close</button>
+                <button class="composer-save-btn" @onclick="SaveInline">Save</button>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="quick-add" @onclick="ExpandEditor">
+        <span class="quick-add-placeholder">Write a note...</span>
+        <div class="quick-add-actions" @onclick:stopPropagation="true">
+            <button class="quick-add-btn" title="New note" @onclick="ExpandEditor">
+                <MudIcon Icon="@Icons.Material.Outlined.Edit" Style="font-size:20px;" />
+            </button>
+        </div>
+    </div>
+}
 
 @if (loading)
 {
@@ -39,7 +100,7 @@ else
         <MudText Typo="Typo.overline" Color="Color.Secondary" Class="mb-2">Others</MudText>
     }
 
-    <MudGrid Spacing="3">
+    <MudGrid Spacing="3" Justify="Justify.FlexStart">
         @foreach (var note in unpinnedNotes)
         {
             <MudItem xs="12" sm="6" md="4" lg="3">
@@ -51,19 +112,45 @@ else
 }
 
 @code {
-    private List<NoteDto> allNotes = [];
-    private List<NoteDto> pinnedNotes = [];
+    private List<NoteDto> allNotes     = [];
+    private List<NoteDto> pinnedNotes  = [];
     private List<NoteDto> unpinnedNotes = [];
     private string? currentSearch;
     private bool loading = true;
 
+    // ── Inline composer state ──────────────────────────────────────────────
+    private bool    _expanded  = false;
+    private string  _newTitle  = string.Empty;
+    private string? _newContent;
+    private string  _newColor  = "Default";
+    private List<ItemModel> _newItems = [];
+
+    private static readonly string[] _colors =
+        ["Default", "Salmon", "Peach", "LightYellow", "Mint", "Cyan",
+         "SkyBlue", "CornflowerBlue", "Lavender", "HotPink", "Tan", "Silver"];
+
+    private class ItemModel
+    {
+        public string Text      { get; set; } = string.Empty;
+        public bool   IsChecked { get; set; }
+        public int    Order     { get; set; }
+    }
+
+    // ── Lifecycle ──────────────────────────────────────────────────────────
     protected override async Task OnInitializedAsync()
     {
-        Search.OnSearch += HandleSearch;
-        NoteActions.OnOpenEditor += HandleOpenEditor;
+        Search.OnSearch          += HandleSearch;
+        NoteActions.OnExpandEditor += HandleExpandEditor;
         await LoadNotes();
     }
 
+    public void Dispose()
+    {
+        Search.OnSearch          -= HandleSearch;
+        NoteActions.OnExpandEditor -= HandleExpandEditor;
+    }
+
+    // ── Search ─────────────────────────────────────────────────────────────
     private async void HandleSearch(string? term)
     {
         currentSearch = term;
@@ -73,34 +160,55 @@ else
 
     private async Task LoadNotes(string? search = null)
     {
-        loading = true;
-        allNotes = await Api.GetNotesAsync(search: search);
-        pinnedNotes = allNotes.Where(n => n.IsPinned).ToList();
+        loading      = true;
+        allNotes     = await Api.GetNotesAsync(search: search);
+        pinnedNotes  = allNotes.Where(n => n.IsPinned).ToList();
         unpinnedNotes = allNotes.Where(n => !n.IsPinned).ToList();
-        loading = false;
+        loading      = false;
     }
 
-    public void Dispose()
+    // ── Inline composer ────────────────────────────────────────────────────
+    private void HandleExpandEditor()
     {
-        Search.OnSearch -= HandleSearch;
-        NoteActions.OnOpenEditor -= HandleOpenEditor;
-    }
-
-    private async void HandleOpenEditor(string type)
-    {
-        await OpenEditor(type);
+        ExpandEditor();
         StateHasChanged();
     }
 
-    private async Task OpenEditor(string type)
+    private void ExpandEditor()
     {
-        var parameters = new DialogParameters<NoteEditor> { { x => x.DefaultType, type } };
-        var dialog = await DialogService.ShowAsync<NoteEditor>("New Note", parameters);
-        var result = await dialog.Result;
-        if (result is { Canceled: false, Data: SaveNoteArgs args })
-            await ProcessSave(null, args);
+        _expanded   = true;
+        _newTitle   = string.Empty;
+        _newContent = null;
+        _newColor   = "Default";
+        _newItems   = [];
     }
 
+    private void CancelInline() => _expanded = false;
+
+    private async Task SaveInline()
+    {
+        var hasContent = !string.IsNullOrWhiteSpace(_newTitle)
+                      || !string.IsNullOrWhiteSpace(_newContent)
+                      || _newItems.Count > 0;
+
+        if (hasContent)
+        {
+            var type = _newItems.Count > 0 ? "Checklist" : "Text";
+            await Api.CreateNoteAsync(new
+            {
+                title          = _newTitle,
+                content        = _newContent,
+                color          = _newColor,
+                type,
+                checklistItems = _newItems.Select((it, i) => new { it.Text, it.IsChecked, Order = i }).ToList()
+            });
+            await LoadNotes();
+        }
+
+        _expanded = false;
+    }
+
+    // ── Edit existing note (dialog) ────────────────────────────────────────
     private async Task EditNote(NoteDto note)
     {
         var parameters = new DialogParameters<NoteEditor> { { x => x.ExistingNote, note } };
@@ -110,28 +218,23 @@ else
             await ProcessSave(note, args);
     }
 
-    private async Task ProcessSave(NoteDto? existing, SaveNoteArgs args)
+    private async Task ProcessSave(NoteDto existing, SaveNoteArgs args)
     {
         if (string.IsNullOrWhiteSpace(args.Title) && string.IsNullOrWhiteSpace(args.Content) && args.Items.Count == 0)
             return;
 
-        var payload = new
+        await Api.UpdateNoteAsync(existing.Id, new
         {
-            title = args.Title,
-            content = args.Content,
-            color = args.Color,
-            type = args.Type,
+            title          = args.Title,
+            content        = args.Content,
+            color          = args.Color,
             checklistItems = args.Items.Select(i => new { i.Text, i.IsChecked, i.Order }).ToList()
-        };
-
-        if (existing is null)
-            await Api.CreateNoteAsync(payload);
-        else
-            await Api.UpdateNoteAsync(existing.Id, payload);
+        });
 
         await LoadNotes();
     }
 
+    // ── Note actions ───────────────────────────────────────────────────────
     private async Task TogglePin(NoteDto note)
     {
         await Api.UpdateNoteAsync(note.Id, new { isPinned = !note.IsPinned });

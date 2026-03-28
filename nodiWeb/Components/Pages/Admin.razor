@@ -1,5 +1,6 @@
 @page "/admin"
 @attribute [Authorize(Roles = "Admin")]
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 @inject ApiService Api
 
 <PageTitle>Admin - nodi</PageTitle>

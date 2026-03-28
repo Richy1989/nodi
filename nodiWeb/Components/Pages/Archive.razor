@@ -1,5 +1,6 @@
 @page "/archive"
 @attribute [Authorize]
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 @inject ApiService Api
 
 <PageTitle>Archive - nodi</PageTitle>

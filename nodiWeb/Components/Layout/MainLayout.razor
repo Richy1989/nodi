@@ -28,15 +28,10 @@
                           ValueChanged="@((string s) => OnSearch(s))"
                           Class="search-field px-3"/>
             
-             <div class="appbar-right">
+            <div class="appbar-right">
                 <MudTooltip Text="New note">
                     <MudIconButton Icon="@Icons.Material.Filled.Add"
-                                   OnClick='() => NoteActions.OpenEditor("Text")'
-                                   Class="appbar-action-btn" />
-                </MudTooltip>
-                <MudTooltip Text="New checklist">
-                    <MudIconButton Icon="@Icons.Material.Filled.PlaylistAddCheck"
-                                   OnClick='() => NoteActions.OpenEditor("Checklist")'
+                                   OnClick="() => NoteActions.ExpandEditor()"
                                    Class="appbar-action-btn" />
                 </MudTooltip>
                 <UserMenu />
