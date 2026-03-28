@@ -1,0 +1,151 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>nodi</Name>
+  <Repository>richy1989/nodi</Repository>
+  <Network>bridge</Network>
+  <Shell>bash</Shell>
+  <Privileged>false</Privileged>
+
+  <Overview>
+A self-hosted, multi-platform note-taking app. Create text and checklist notes, organise with tags, pin and archive, choose from 12 colour themes per note, and manage user accounts via an admin panel. Both the API and web app run inside a single container.
+  </Overview>
+
+  <Category>Productivity</Category>
+  <WebUI>http://[IP]:[PORT:8080]/</WebUI>
+  <Icon>https://raw.githubusercontent.com/richy1989/nodi/main/nodiWeb/wwwroot/favicon.png</Icon>
+  <Project>https://github.com/richy1989/nodi</Project>
+  <Support>https://github.com/richy1989/nodi/issues</Support>
+  <TemplateURL>https://raw.githubusercontent.com/richy1989/nodi/main/unraid/nodi-unraid-template.xml</TemplateURL>
+
+  <Config
+    Name="Web UI Port"
+    Target="8080"
+    Default="8080"
+    Mode="tcp"
+    Description="Port the web app is served on."
+    Type="Port"
+    Display="always"
+    Required="true"
+    Mask="false">8080</Config>
+
+  <Config
+    Name="Data"
+    Target="/app/data"
+    Default="/mnt/user/appdata/nodi"
+    Mode="rw"
+    Description="Directory where the SQLite database and other persistent files are stored."
+    Type="Path"
+    Display="always"
+    Required="true"
+    Mask="false">/mnt/user/appdata/nodi</Config>
+
+  <Config
+    Name="JWT Key"
+    Target="Jwt__Key"
+    Default="CHANGE_ME_MIN_32_CHARS"
+    Description="Secret key used to sign JWT tokens. Must be at least 32 characters."
+    Type="Variable"
+    Display="always"
+    Required="true"
+    Mask="true">CHANGE_ME_MIN_32_CHARS</Config>
+
+  <Config
+    Name="Admin Password"
+    Target="Admin__Password"
+    Default="CHANGE_ME"
+    Description="Password for the admin account created on first run. Changing this later has no effect once the database is seeded."
+    Type="Variable"
+    Display="always"
+    Required="true"
+    Mask="true">CHANGE_ME</Config>
+
+  <Config
+    Name="Admin Username"
+    Target="Admin__Username"
+    Default="admin"
+    Description="Username for the admin account created on first run."
+    Type="Variable"
+    Display="advanced"
+    Required="false"
+    Mask="false">admin</Config>
+
+  <Config
+    Name="Admin Email"
+    Target="Admin__Email"
+    Default="admin@nodi.local"
+    Description="Email for the admin account created on first run."
+    Type="Variable"
+    Display="advanced"
+    Required="false"
+    Mask="false">admin@nodi.local</Config>
+
+  <Config
+    Name="JWT Issuer"
+    Target="Jwt__Issuer"
+    Default="nodiCore"
+    Description="JWT issuer claim."
+    Type="Variable"
+    Display="advanced"
+    Required="false"
+    Mask="false">nodiCore</Config>
+
+  <Config
+    Name="JWT Audience"
+    Target="Jwt__Audience"
+    Default="nodiClients"
+    Description="JWT audience claim."
+    Type="Variable"
+    Display="advanced"
+    Required="false"
+    Mask="false">nodiClients</Config>
+
+  <Config
+    Name="JWT Expiry (hours)"
+    Target="Jwt__ExpiryHours"
+    Default="72"
+    Description="How long issued JWT tokens remain valid, in hours."
+    Type="Variable"
+    Display="advanced"
+    Required="false"
+    Mask="false">72</Config>
+
+  <Config
+    Name="Database Provider"
+    Target="Database__Provider"
+    Default="sqlite"
+    Description="Database backend. Use 'sqlite' for local storage or 'postgresql' for an external PostgreSQL database."
+    Type="Variable"
+    Display="advanced"
+    Required="false"
+    Mask="false">sqlite</Config>
+
+  <Config
+    Name="PostgreSQL Connection String"
+    Target="ConnectionStrings__PostgreSQL"
+    Default=""
+    Description="PostgreSQL connection string. Required only when Database Provider is set to 'postgresql'. Example: Host=db;Database=nodi;Username=nodi;Password=secret"
+    Type="Variable"
+    Display="advanced"
+    Required="false"
+    Mask="true"></Config>
+
+  <Config
+    Name="Internal API Port"
+    Target="CORE_PORT"
+    Default="5100"
+    Description="Internal API port inside the container. Usually does not need to be changed."
+    Type="Variable"
+    Display="advanced"
+    Required="false"
+    Mask="false">5100</Config>
+
+  <Config
+    Name="Internal Web Port"
+    Target="WEB_PORT"
+    Default="8080"
+    Description="Internal web port inside the container. Must match the mapped container port."
+    Type="Variable"
+    Display="advanced"
+    Required="false"
+    Mask="false">8080</Config>
+</Container>
