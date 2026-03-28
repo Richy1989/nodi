@@ -158,6 +158,23 @@ public class ApiService(IHttpClientFactory httpClientFactory, AuthStateProvider 
         (await CreateClient().DeleteAsync($"api/tags/{id}")).IsSuccessStatusCode;
 
     // -------------------------------------------------------------------------
+    // User settings
+    // -------------------------------------------------------------------------
+
+    /// <summary>Returns the current user's personal settings (e.g. theme preference).</summary>
+    public async Task<UserSettingsDto?> GetUserSettingsAsync()
+    {
+        var response = await CreateClient().GetAsync("api/user/settings");
+        return response.IsSuccessStatusCode
+            ? await response.Content.ReadFromJsonAsync<UserSettingsDto>()
+            : null;
+    }
+
+    /// <summary>Persists the user's theme preference (<c>"Dark"</c> or <c>"Light"</c>).</summary>
+    public async Task<bool> SetUserThemeAsync(string theme) =>
+        (await CreateClient().PutAsJsonAsync("api/user/settings/theme", theme)).IsSuccessStatusCode;
+
+    // -------------------------------------------------------------------------
     // Admin  (requires Admin role)
     // -------------------------------------------------------------------------
 

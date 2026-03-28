@@ -2,8 +2,12 @@
 @inject AuthStateProvider AuthState
 @inject SearchService Search
 @inject NoteActionsService NoteActions
+@inject ThemeService Theme
+@inject ApiService Api
+@inject IJSRuntime JS
+@implements IDisposable
 
-<MudThemeProvider Theme="_theme" IsDarkMode="true" />
+<MudThemeProvider Theme="_theme" IsDarkMode="@Theme.IsDarkMode" />
 <MudPopoverProvider />
 <MudDialogProvider MaxWidth="MaxWidth.Small" FullWidth="true" />
 <MudSnackbarProvider />
@@ -11,8 +15,7 @@
 @if (AuthState.CurrentUser is not null)
 {
     <MudLayout>
-        <MudAppBar Elevation="0"
-                   Style="border-bottom:1px solid rgba(255,255,255,.06);">
+        <MudAppBar Elevation="0" Class="nodi-appbar">
             <button class="appbar-icon-btn" @onclick="() => _drawerOpen = !_drawerOpen"
                     title="Toggle sidebar">
                 <Blazicon Svg="Lucide.PanelLeft" />
@@ -27,7 +30,7 @@
                           Immediate="true"
                           ValueChanged="@((string s) => OnSearch(s))"
                           Class="search-field px-3"/>
-            
+
             <div class="appbar-right">
                 <MudTooltip Text="New note">
                     <MudIconButton Icon="@Icons.Material.Filled.Add"
@@ -39,8 +42,7 @@
         </MudAppBar>
 
         <MudDrawer @bind-Open="_drawerOpen" Variant="DrawerVariant.Responsive"
-                   Elevation="0" Width="240px"
-                   Style="border-right:1px solid rgba(255,255,255,.06);">
+                   Elevation="0" Width="240px" Class="nodi-drawer">
             <NavMenu />
         </MudDrawer>
 
@@ -58,12 +60,18 @@ else
 
 @code {
     private bool _drawerOpen = true;
-    
+    private bool _themeLoaded = false;
+
     private string searchTerm = string.Empty;
     private void OnSearch(string value)
     {
         searchTerm = value;
         Search.Search(string.IsNullOrWhiteSpace(value) ? null : value);
+    }
+
+    protected override void OnInitialized()
+    {
+        Theme.OnThemeChanged += HandleThemeChanged;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -73,6 +81,26 @@ else
             await AuthState.TryRestoreFromStorageAsync();
             StateHasChanged();
         }
+
+        if (!_themeLoaded && AuthState.CurrentUser is not null)
+        {
+            _themeLoaded = true;
+            var settings = await Api.GetUserSettingsAsync();
+            Theme.Apply(settings?.Theme != "Light");
+            await JS.InvokeVoidAsync("nodi.setTheme", Theme.IsDarkMode);
+            StateHasChanged();
+        }
+    }
+
+    private async void HandleThemeChanged()
+    {
+        await JS.InvokeVoidAsync("nodi.setTheme", Theme.IsDarkMode);
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        Theme.OnThemeChanged -= HandleThemeChanged;
     }
 
     private readonly MudTheme _theme = new()
@@ -102,6 +130,8 @@ else
                 LetterSpacing = "0.1px"
             }
         },
+
+        // ── Dark palette ───────────────────────────────────────────────────────
         PaletteDark = new PaletteDark()
         {
             Primary          = "#fbbf24",   // amber-400
@@ -116,6 +146,23 @@ else
             TextSecondary    = "#a1a1aa",
             ActionDefault    = "#a1a1aa",
             Divider          = "rgba(255,255,255,0.07)",
+        },
+
+        // ── Light palette ──────────────────────────────────────────────────────
+        PaletteLight = new PaletteLight()
+        {
+            Primary          = "#d97706",   // amber-600
+            Secondary        = "#059669",   // emerald-600
+            Background       = "#f4f4f5",   // zinc-100
+            Surface          = "#ffffff",
+            DrawerBackground = "#e4e4e7",   // zinc-200
+            AppbarBackground = "#ffffff",
+            AppbarText       = "#18181b",
+            DrawerText       = "#3f3f46",
+            TextPrimary      = "#18181b",
+            TextSecondary    = "#71717a",
+            ActionDefault    = "#71717a",
+            Divider          = "rgba(0,0,0,0.08)",
         }
     };
 }

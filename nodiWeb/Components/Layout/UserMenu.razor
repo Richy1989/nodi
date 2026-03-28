@@ -1,5 +1,7 @@
 @inject AuthStateProvider AuthState
 @inject NavigationManager Nav
+@inject ThemeService Theme
+@inject ApiService Api
 
 <MudMenu Dense="true" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
     <ActivatorContent>
@@ -12,7 +14,14 @@
             <div class="user-menu-name">@AuthState.CurrentUser?.Username</div>
             <div class="user-menu-email">@AuthState.CurrentUser?.Email</div>
         </div>
-        <MudMenuItem Icon="@Icons.Material.Outlined.Settings" Disabled="true">Settings</MudMenuItem>
+        <MudMenuItem OnClick="ToggleTheme">
+            <div class="menu-item-row">
+                <span class="menu-item-icon">
+                    <Blazicon Svg="@(Theme.IsDarkMode ? Lucide.Sun : Lucide.Moon)" />
+                </span>
+                <span>@(Theme.IsDarkMode ? "Light mode" : "Dark mode")</span>
+            </div>
+        </MudMenuItem>
         <MudDivider />
         <MudMenuItem OnClick="Logout">
             <div class="menu-item-row menu-item-danger">
@@ -24,6 +33,12 @@
 </MudMenu>
 
 @code {
+    private async Task ToggleTheme()
+    {
+        Theme.Toggle();
+        await Api.SetUserThemeAsync(Theme.IsDarkMode ? "Dark" : "Light");
+    }
+
     private async Task Logout()
     {
         await AuthState.SetUserAsync(null);

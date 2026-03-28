@@ -12,6 +12,8 @@ public class User
     public bool IsActive { get; set; } = true;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    public string Theme { get; set; } = "Dark";
+
     public ICollection<Note> Notes { get; set; } = [];
     public ICollection<Tag> Tags { get; set; } = [];
 }

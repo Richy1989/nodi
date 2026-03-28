@@ -50,6 +50,7 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<NoteService>();
 builder.Services.AddScoped<TagService>();
 builder.Services.AddScoped<SettingsService>();
+builder.Services.AddScoped<UserSettingsService>();
 
 builder.Services.AddCors(options =>
 {
@@ -64,6 +65,9 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.EnsureCreated();
+    // Gracefully add new columns to existing SQLite databases (EnsureCreated won't migrate)
+    try { db.Database.ExecuteSqlRaw("ALTER TABLE Users ADD COLUMN Theme TEXT NOT NULL DEFAULT 'Dark'"); }
+    catch { /* column already exists */ }
     await DbSeeder.SeedAsync(db, builder.Configuration);
 }
 

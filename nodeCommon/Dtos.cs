@@ -50,3 +50,8 @@ public record UserDto(int Id, string Username, string Email, string Role, bool I
 /// A single application-wide configuration entry (key/value pair).
 /// </summary>
 public record AppSettingDto(string Key, string Value);
+
+/// <summary>
+/// Per-user preferences returned by <c>GET /api/user/settings</c>.
+/// </summary>
+public record UserSettingsDto(string Theme);

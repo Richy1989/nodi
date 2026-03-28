@@ -467,3 +467,86 @@
 }
 .menu-item-icon { font-size: 15px; display: inline-flex; align-items: center; }
 .menu-item-danger { color: #f87171; }
+
+/* ─── AppBar / Drawer theme-aware borders ────────────────────────────────── */
+.nodi-appbar { border-bottom: 1px solid rgba(255,255,255,.06) !important; }
+.nodi-drawer { border-right:  1px solid rgba(255,255,255,.06) !important; }
+
+/* ─── Light theme overrides ──────────────────────────────────────────────── */
+/* Applied when nodi.js sets data-theme="light" on <html>                    */
+
+[data-theme="light"] .nodi-appbar { border-bottom: 1px solid rgba(0,0,0,.09) !important; }
+[data-theme="light"] .nodi-drawer { border-right:  1px solid rgba(0,0,0,.09) !important; }
+
+/* Quick-add bar */
+[data-theme="light"] .quick-add {
+    background: #ffffff;
+    border-color: rgba(0,0,0,.12);
+}
+[data-theme="light"] .quick-add:hover {
+    border-color: rgba(0,0,0,.22);
+    box-shadow: 0 4px 20px rgba(0,0,0,.07);
+}
+[data-theme="light"] .quick-add-placeholder { color: #a1a1aa; }
+[data-theme="light"] .quick-add-btn { color: #a1a1aa; }
+[data-theme="light"] .quick-add-btn:hover { color: #3f3f46; background: rgba(0,0,0,.05); }
+
+/* Inline composer */
+[data-theme="light"] .composer {
+    background: #ffffff;
+    border-color: rgba(0,0,0,.12);
+    box-shadow: 0 8px 32px rgba(0,0,0,.07);
+}
+[data-theme="light"] .composer-title             { color: #18181b; }
+[data-theme="light"] .composer-title::placeholder   { color: #a1a1aa; }
+[data-theme="light"] .composer-content            { color: #3f3f46; }
+[data-theme="light"] .composer-content::placeholder { color: #a1a1aa; }
+[data-theme="light"] .composer-items              { border-top-color: rgba(0,0,0,.07); }
+[data-theme="light"] .composer-item-text          { color: #3f3f46; }
+[data-theme="light"] .composer-item-text::placeholder { color: #a1a1aa; }
+[data-theme="light"] .composer-remove-btn         { color: #a1a1aa; }
+[data-theme="light"] .composer-remove-btn:hover   { color: #71717a; }
+[data-theme="light"] .composer-footer             { border-top-color: rgba(0,0,0,.07); }
+[data-theme="light"] .composer-add-item-btn       { color: #71717a; }
+[data-theme="light"] .composer-add-item-btn:hover { color: #27272a; background: rgba(0,0,0,.05); }
+[data-theme="light"] .composer-close-btn          { color: #71717a; }
+[data-theme="light"] .composer-close-btn:hover    { background: rgba(0,0,0,.06); }
+
+/* Note default color */
+[data-theme="light"] .note-color-default { background-color: #f0f0f2 !important; }
+[data-theme="light"] .note-card:hover    { box-shadow: 0 8px 24px rgba(0,0,0,.1) !important; }
+
+/* Icon buttons */
+[data-theme="light"] .icon-btn              { color: rgba(0,0,0,.45); }
+[data-theme="light"] .icon-btn:hover        { color: rgba(0,0,0,.8); background: rgba(0,0,0,.07); }
+[data-theme="light"] .icon-btn-active       { color: #d97706 !important; }
+[data-theme="light"] .icon-btn-danger:hover { color: #dc2626 !important; background: rgba(220,38,38,.1); }
+
+/* Checklist rows */
+[data-theme="light"] .checklist-row { color: rgba(0,0,0,.75); }
+
+/* Sidebar */
+[data-theme="light"] .sidebar-brand        { border-bottom-color: rgba(0,0,0,.09); }
+[data-theme="light"] .sidebar-link         { color: #71717a; }
+[data-theme="light"] .sidebar-link:hover   { background: rgba(0,0,0,.05); color: #27272a; }
+[data-theme="light"] .sidebar-link.active  { background: rgba(217,119,6,.12); color: #d97706; }
+[data-theme="light"] .sidebar-divider      { background: rgba(0,0,0,.08); }
+
+/* AppBar buttons */
+[data-theme="light"] .appbar-icon-btn       { color: rgba(0,0,0,.55); }
+[data-theme="light"] .appbar-icon-btn:hover { background: rgba(0,0,0,.06); color: #18181b; }
+[data-theme="light"] .appbar-action-btn.mud-icon-button {
+    background: rgba(217,119,6,.12);
+    color: #d97706;
+}
+[data-theme="light"] .appbar-action-btn.mud-icon-button:hover {
+    background: rgba(217,119,6,.25);
+    color: #92400e;
+}
+
+/* User menu */
+[data-theme="light"] .user-menu-header { border-bottom-color: rgba(0,0,0,.08); }
+[data-theme="light"] .menu-item-danger { color: #dc2626; }
+
+/* Note date (was .text-white) */
+[data-theme="light"] .text-white { color: rgba(0,0,0,.4) !important; }
