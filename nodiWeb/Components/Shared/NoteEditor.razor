@@ -1,3 +1,5 @@
+@inject IJSRuntime JS
+
 <MudDialog>
     <TitleContent>
         <MudTextField @bind-Value="editNote.Title" Placeholder="Title"
@@ -21,9 +23,9 @@
                 <MudCheckBox T="bool" Value="@items[idx].IsChecked"
                              ValueChanged="@((bool v) => items[idx].IsChecked = v)"
                              Size="Size.Small" Color="Color.Primary" />
-                <MudTextField @bind-Value="items[idx].Text" Placeholder="List item"
-                              Variant="Variant.Text" Margin="Margin.Dense" FullWidth="true"
-                              DisableUnderLine="true" />
+                <input id="edit-item-@idx" class="composer-item-text" placeholder="List item"
+                       @bind="items[idx].Text" @bind:event="oninput"
+                       @onkeydown="e => HandleItemKeyDown(e, idx)" />
                 <MudIconButton Icon="@Icons.Material.Filled.Close" Size="Size.Small"
                                OnClick="() => RemoveItem(idx)" />
             </div>
@@ -56,6 +58,7 @@
     private static readonly string[] Colors = ["Default", "Salmon", "Peach", "LightYellow", "Mint", "Cyan", "SkyBlue", "CornflowerBlue", "Lavender", "HotPink", "Tan", "Silver"];
     private EditModel editNote = new();
     private List<ItemModel> items = [];
+    private int _focusItemIdx = -1;
 
     protected override void OnParametersSet()
     {
@@ -76,6 +79,23 @@
             editNote = new EditModel();
             items = [];
         }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_focusItemIdx >= 0)
+        {
+            await JS.InvokeVoidAsync("nodi.focusById", $"edit-item-{_focusItemIdx}");
+            _focusItemIdx = -1;
+        }
+    }
+
+    private void HandleItemKeyDown(KeyboardEventArgs e, int idx)
+    {
+        if (e.Key != "Enter") return;
+        items.Insert(idx + 1, new ItemModel { Order = idx + 1 });
+        for (int i = 0; i < items.Count; i++) items[i].Order = i;
+        _focusItemIdx = idx + 1;
     }
 
     private void AddItem() => items.Add(new ItemModel { Order = items.Count });

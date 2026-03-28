@@ -29,8 +29,9 @@
                         <input type="checkbox" class="composer-checkbox"
                                checked="@_newItems[idx].IsChecked"
                                @onchange="e => _newItems[idx].IsChecked = (bool)(e.Value ?? false)" />
-                        <input class="composer-item-text" placeholder="List item"
-                               @bind="_newItems[idx].Text" @bind:event="oninput" />
+                        <input id="new-item-@idx" class="composer-item-text" placeholder="List item"
+                               @bind="_newItems[idx].Text" @bind:event="oninput"
+                               @onkeydown="e => HandleNewItemKeyDown(e, idx)" />
                         <button class="composer-remove-btn" @onclick="() => _newItems.RemoveAt(idx)">
                             <MudIcon Icon="@Icons.Material.Filled.Close" Style="font-size:16px;" />
                         </button>
@@ -125,6 +126,7 @@ else
     private string? _newContent;
     private string  _newColor  = "Default";
     private List<ItemModel> _newItems = [];
+    private int     _focusItemIdx = -1;
 
     private static readonly string[] _colors =
         ["Default", "Salmon", "Peach", "LightYellow", "Mint", "Cyan",
@@ -147,6 +149,11 @@ else
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (_focusItemIdx >= 0)
+        {
+            await JS.InvokeVoidAsync("nodi.focusById", $"new-item-{_focusItemIdx}");
+            _focusItemIdx = -1;
+        }
         if (!loading && allNotes.Count > 0)
             await JS.InvokeVoidAsync("masonry.init", ".notes-masonry");
     }
@@ -188,6 +195,14 @@ else
         _newContent = null;
         _newColor   = "Default";
         _newItems   = [];
+    }
+
+    private void HandleNewItemKeyDown(KeyboardEventArgs e, int idx)
+    {
+        if (e.Key != "Enter") return;
+        _newItems.Insert(idx + 1, new() { Order = idx + 1 });
+        for (int i = 0; i < _newItems.Count; i++) _newItems[i].Order = i;
+        _focusItemIdx = idx + 1;
     }
 
     private void CancelInline() => _expanded = false;
