@@ -3,6 +3,10 @@ using nodiCore.Models;
 
 namespace nodiCore.Data;
 
+/// <summary>
+/// EF Core database context for the application. Supports SQLite and PostgreSQL;
+/// the provider is selected at startup in <c>Program.cs</c>.
+/// </summary>
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
     public DbSet<User> Users => Set<User>();
@@ -14,6 +18,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // NoteTag uses a composite PK instead of a surrogate key to naturally
+        // prevent duplicate tag assignments on the same note.
         modelBuilder.Entity<NoteTag>()
             .HasKey(nt => new { nt.NoteId, nt.TagId });
 
@@ -27,6 +33,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .WithMany(t => t.NoteTags)
             .HasForeignKey(nt => nt.TagId);
 
+        // Unique indexes so duplicate usernames/emails are rejected at the DB level,
+        // even if the service-layer checks are bypassed by concurrent requests.
         modelBuilder.Entity<User>()
             .HasIndex(u => u.Username).IsUnique();
         modelBuilder.Entity<User>()

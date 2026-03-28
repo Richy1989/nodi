@@ -9,11 +9,16 @@ using nodiCore.Services;
 
 namespace nodiCore.Controllers;
 
+/// <summary>
+/// Admin-only endpoints for user and application settings management.
+/// All routes require the Admin role — regular users receive 403 Forbidden.
+/// </summary>
 [ApiController]
 [Route("api/admin")]
 [Authorize(Roles = "Admin")]
 public class AdminController(AppDbContext db, SettingsService settingsService) : ControllerBase
 {
+    /// <summary>Returns all registered users, sorted alphabetically by username.</summary>
     [HttpGet("users")]
     public async Task<IActionResult> GetUsers()
     {
@@ -24,6 +29,11 @@ public class AdminController(AppDbContext db, SettingsService settingsService) :
         return Ok(users);
     }
 
+    /// <summary>
+    /// Updates a user's active state or role. Only non-null fields are applied.
+    /// Invalid role strings are silently ignored (the enum parse fails and the field
+    /// is left unchanged).
+    /// </summary>
     [HttpPut("users/{id}")]
     public async Task<IActionResult> UpdateUser(int id, UpdateUserRequest request)
     {
@@ -38,6 +48,10 @@ public class AdminController(AppDbContext db, SettingsService settingsService) :
         return Ok(new UserDto(user.Id, user.Username, user.Email, user.Role.ToString(), user.IsActive, user.CreatedAt));
     }
 
+    /// <summary>
+    /// Permanently deletes a user account. Admin accounts are protected — attempting
+    /// to delete an admin returns 400 to prevent accidental lockout.
+    /// </summary>
     [HttpDelete("users/{id}")]
     public async Task<IActionResult> DeleteUser(int id)
     {
@@ -49,12 +63,17 @@ public class AdminController(AppDbContext db, SettingsService settingsService) :
         return NoContent();
     }
 
+    /// <summary>Returns all application-level settings (e.g. AllowRegistration).</summary>
     [HttpGet("settings")]
     public async Task<IActionResult> GetSettings()
     {
         return Ok(await settingsService.GetAllAsync());
     }
 
+    /// <summary>
+    /// Batch-upserts application settings. Each item in the list is individually
+    /// created or updated. Returns the full settings list after applying changes.
+    /// </summary>
     [HttpPut("settings")]
     public async Task<IActionResult> UpdateSettings(List<AppSettingDto> settings)
     {
