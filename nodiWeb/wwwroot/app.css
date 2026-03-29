@@ -1,4 +1,4 @@
-/* ─── Cyberpink design tokens ─────────────────────────────────────────────── */
+/* ─── Cyberpunk design tokens ─────────────────────────────────────────────── */
 :root {
     --pink:        #ff2d78;
     --pink-glow:   rgba(255, 45, 120, 0.35);
@@ -198,23 +198,23 @@
 }
 
 /* ─── Note card colors ───────────────────────────────────────────────────── */
-.note-color-default        { background-color: #1a0030 !important; }
+.note-color-default        { background-color: #2a0a5a !important; }
 
-.note-color-salmon         { background-color: #3d1020 !important; }
-.note-color-peach          { background-color: #3a1a08 !important; }
-.note-color-lightyellow    { background-color: #2a2a00 !important; }
+.note-color-salmon         { background-color: #6a1f3a !important; }
+.note-color-peach          { background-color: #7a3a12 !important; }
+.note-color-lightyellow    { background-color: #5a5200 !important; }
 
-.note-color-mint           { background-color: #00251a !important; }
-.note-color-cyan           { background-color: #001f2a !important; }
+.note-color-mint           { background-color: #0a5a3a !important; }
+.note-color-cyan           { background-color: #0a4a5a !important; }
 
-.note-color-skyblue        { background-color: #001535 !important; }
-.note-color-cornflowerblue { background-color: #0a1545 !important; }
+.note-color-skyblue        { background-color: #0a3a7a !important; }
+.note-color-cornflowerblue { background-color: #1a3a9a !important; }
 
-.note-color-lavender       { background-color: #1a0035 !important; }
-.note-color-hotpink        { background-color: #2a0030 !important; }
+.note-color-lavender       { background-color: #4a1a7a !important; }
+.note-color-hotpink        { background-color: #6a1a5a !important; }
 
-.note-color-tan            { background-color: #2a1800 !important; }
-.note-color-silver         { background-color: #1a1a28 !important; }
+.note-color-tan            { background-color: #5a3a12 !important; }
+.note-color-silver         { background-color: #2a2a3a !important; }
 
 /* ─── Note grid — JS row-span masonry ───────────────────────────────────── */
 .notes-masonry {
