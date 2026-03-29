@@ -115,7 +115,7 @@ All values can be overridden via environment variables
 
 | Environment variable | appsettings.json key | Default | Description |
 |---------------------|---------------------|--------|-------------|
-| `DataFolder` | `DataFolder` | `programData` | Directory for persistent data (database, uploads, etc.) |
+| `DataFolder` | `DataFolder` | `nodiData` | Directory for persistent data (database, uploads, etc.) |
 | `Database__Provider` | `Database:Provider` | `sqlite` | `sqlite` (dev) or `postgresql` (prod) |
 | `ConnectionStrings__PostgreSQL` | `ConnectionStrings:PostgreSQL` | — | Required for PostgreSQL |
 | `Jwt__Key` | `Jwt:Key` | *(required)* | Secret for signing JWT tokens (min. 32 chars) |
@@ -166,6 +166,23 @@ Copy `.env.example` to `.env` and fill in the required values, then:
 
 ```bash
 docker compose up
+```
+
+Or use this minimal inline example:
+
+```yaml
+services:
+  nodi:
+    image: richy1989/nodi
+    container_name: nodi
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - /host/nodi-data:/app/nodiData
+    environment:
+      - Jwt__Key=replace-with-a-long-random-secret-at-least-32-chars
+      - Admin__Password=replace-with-a-strong-password
 ```
 
 ### Build and push
@@ -219,7 +236,7 @@ No configuration required.
 The database is automatically created at:
 
 ```
-programData/nodi.db
+nodiData/nodi.db
 ```
 
 (relative to the working directory)
