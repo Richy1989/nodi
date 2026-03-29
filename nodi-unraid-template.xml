@@ -30,7 +30,7 @@ A self-hosted, multi-platform note-taking app. Create text and checklist notes, 
 
   <Config
     Name="Data"
-    Target="/app/data"
+    Target="/app/nodiData"
     Default="/mnt/user/appdata/nodi"
     Mode="rw"
     Description="Directory where the SQLite database and other persistent files are stored."

@@ -17,7 +17,7 @@ services:
       - "${WEB_PORT:-8080}:${WEB_PORT:-8080}"
     volumes:
       # SQLite database and persistent files
-      - nodi-data:/app/data
+      - nodi-data:/app/nodiData
     environment:
       - CORE_PORT=${CORE_PORT:-5100}
       - WEB_PORT=${WEB_PORT:-8080}

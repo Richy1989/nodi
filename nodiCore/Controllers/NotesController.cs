@@ -31,7 +31,8 @@ public class NotesController(NoteService noteService, ILogger<NotesController> l
         [FromQuery] int? tagId = null,
         [FromQuery] string? search = null)
     {
-        logger.LogInformation("GetNotes | user={UserId} archived={Archived} deleted={Deleted} tagId={TagId} search={Search}",
+        logger.LogInformation("Listing notes for user {UserId}", UserId);
+        logger.LogDebug("GetNotes | user={UserId} archived={Archived} deleted={Deleted} tagId={TagId} search={Search}",
             UserId, archived, deleted, tagId, search);
 
         return Ok(await noteService.GetNotesAsync(UserId, archived, deleted, tagId, search));
@@ -41,7 +42,8 @@ public class NotesController(NoteService noteService, ILogger<NotesController> l
     [HttpGet("{id}")]
     public async Task<IActionResult> GetNote(int id)
     {
-        logger.LogInformation("GetNote | user={UserId} id={NoteId}", UserId, id);
+        logger.LogInformation("Fetching note {NoteId} for user {UserId}", id, UserId);
+        logger.LogDebug("GetNote | user={UserId} id={NoteId}", UserId, id);
 
         var note = await noteService.GetNoteAsync(UserId, id);
         return note is null ? NotFound() : Ok(note);
@@ -51,9 +53,10 @@ public class NotesController(NoteService noteService, ILogger<NotesController> l
     [HttpPost]
     public async Task<IActionResult> CreateNote(CreateNoteRequest request)
     {
-        logger.LogInformation("CreateNote | user={UserId} payload={@Request}", UserId, request);
+        logger.LogDebug("CreateNote | user={UserId} payload={@Request}", UserId, request);
 
         var note = await noteService.CreateNoteAsync(UserId, request);
+        logger.LogInformation("Note {NoteId} created for user {UserId}", note.Id, UserId);
         return CreatedAtAction(nameof(GetNote), new { id = note.Id }, note);
     }
 
@@ -64,10 +67,16 @@ public class NotesController(NoteService noteService, ILogger<NotesController> l
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateNote(int id, UpdateNoteRequest request)
     {
-        logger.LogInformation("UpdateNote | user={UserId} id={NoteId} payload={@Request}", UserId, id, request);
+        logger.LogDebug("UpdateNote | user={UserId} id={NoteId} payload={@Request}", UserId, id, request);
 
         var note = await noteService.UpdateNoteAsync(UserId, id, request);
-        return note is null ? NotFound() : Ok(note);
+        if (note is null)
+        {
+            logger.LogInformation("Note {NoteId} not found for user {UserId}", id, UserId);
+            return NotFound();
+        }
+        logger.LogInformation("Note {NoteId} updated for user {UserId}", id, UserId);
+        return Ok(note);
     }
 
     /// <summary>
@@ -76,9 +85,11 @@ public class NotesController(NoteService noteService, ILogger<NotesController> l
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteNote(int id)
     {
-        logger.LogInformation("DeleteNote | user={UserId} id={NoteId}", UserId, id);
+        logger.LogDebug("DeleteNote | user={UserId} id={NoteId}", UserId, id);
 
-        return await noteService.DeleteNoteAsync(UserId, id) ? NoContent() : NotFound();
+        var deleted = await noteService.DeleteNoteAsync(UserId, id);
+        if (deleted) logger.LogInformation("Note {NoteId} moved to trash by user {UserId}", id, UserId);
+        return deleted ? NoContent() : NotFound();
     }
 
     /// <summary>
@@ -88,9 +99,11 @@ public class NotesController(NoteService noteService, ILogger<NotesController> l
     [HttpDelete("{id}/permanent")]
     public async Task<IActionResult> PermanentDelete(int id)
     {
-        logger.LogInformation("PermanentDelete | user={UserId} id={NoteId}", UserId, id);
+        logger.LogDebug("PermanentDelete | user={UserId} id={NoteId}", UserId, id);
 
-        return await noteService.DeleteNoteAsync(UserId, id, permanent: true) ? NoContent() : NotFound();
+        var deleted = await noteService.DeleteNoteAsync(UserId, id, permanent: true);
+        if (deleted) logger.LogInformation("Note {NoteId} permanently deleted by user {UserId}", id, UserId);
+        return deleted ? NoContent() : NotFound();
     }
 
     /// <summary>
@@ -100,8 +113,10 @@ public class NotesController(NoteService noteService, ILogger<NotesController> l
     [HttpPut("{id}/restore")]
     public async Task<IActionResult> RestoreNote(int id)
     {
-        logger.LogInformation("RestoreNote | user={UserId} id={NoteId}", UserId, id);
+        logger.LogDebug("RestoreNote | user={UserId} id={NoteId}", UserId, id);
 
-        return await noteService.RestoreNoteAsync(UserId, id) ? NoContent() : NotFound();
+        var restored = await noteService.RestoreNoteAsync(UserId, id);
+        if (restored) logger.LogInformation("Note {NoteId} restored by user {UserId}", id, UserId);
+        return restored ? NoContent() : NotFound();
     }
 }

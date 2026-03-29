@@ -30,14 +30,18 @@ var dbProvider = builder.Configuration.GetValue<string>("Database:Provider") ?? 
 if (dbProvider.Equals("postgresql", StringComparison.OrdinalIgnoreCase))
 {
     builder.Services.AddDbContext<AppDbContext>(options =>
-        options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQL")));
+        options.UseNpgsql(
+            builder.Configuration.GetConnectionString("PostgreSQL"),
+            o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
 }
 else
 {
     // Place the SQLite file inside the data folder instead of the working directory.
     var sqlitePath = Path.Combine(appConfig.DataFolder, "nodi.db");
     builder.Services.AddDbContext<AppDbContext>(options =>
-        options.UseSqlite($"Data Source={sqlitePath}"));
+        options.UseSqlite(
+            $"Data Source={sqlitePath}",
+            o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
 }
 
 // ── JWT Authentication ────────────────────────────────────────────────────────

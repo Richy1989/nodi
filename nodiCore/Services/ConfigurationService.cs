@@ -16,5 +16,5 @@ public class ConfigurationService(IConfiguration config)
     /// Resolves relative paths against the working directory so all callers
     /// always receive an absolute path regardless of how the value was set.
     /// </summary>
-    public string DataFolder { get; } = Path.GetFullPath(config.GetValue<string>("DataFolder") ?? "programData");
+    public string DataFolder { get; } = Path.GetFullPath(config.GetValue<string>("DataFolder") ?? "nodiData");
 }

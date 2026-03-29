@@ -143,7 +143,7 @@ nodi ships as a **single combined image**. Both the API (`nodiCore`) and the web
 │      │                          │
 │  nodiCore :5100  (internal)     │
 │      │                          │
-│  /app/data  (SQLite + files)    │
+│  /app/nodiData  (SQLite + files)    │
 └─────────────────────────────────┘
 ```
 
@@ -153,7 +153,7 @@ nodi ships as a **single combined image**. Both the API (`nodiCore`) and the web
 docker run -d \
   -e Jwt__Key="replace-with-a-long-random-secret-at-least-32-chars" \
   -e Admin__Password="replace-with-a-strong-password" \
-  -v /host/nodi-data:/app/data \
+  -v /host/nodi-data:/app/nodiData \
   -p 8080:8080 \
   richy1989/nodi
 ```
@@ -187,7 +187,7 @@ docker compose up
 
 1. **Docker → Add Container**, set repository to `richy1989/nodi`
 2. Add a **Port** mapping: host `8080` → container `8080`
-3. Add a **Path** mapping: host `/mnt/user/appdata/nodi` → container `/app/data`
+3. Add a **Path** mapping: host `/mnt/user/appdata/nodi` → container `/app/nodiData`
 4. Add the required environment variables (see table above)
 5. Click **Apply**
 
@@ -208,7 +208,7 @@ The API port (`CORE_PORT`) does **not** need to be mapped — it never leaves th
 
 ### Data persistence
 
-All persistent files (SQLite database, uploads) live at `/app/data` inside the container. Mount a volume or host path there to keep data across container recreations.
+All persistent files (SQLite database, uploads) live at `/app/nodiData` inside the container. Mount a volume or host path there to keep data across container recreations.
 
 ---
 
