@@ -1,5 +1,6 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using nodiCore.Data;
@@ -73,6 +74,9 @@ builder.Services.AddScoped<UserSettingsService>();
 // ── Configuration singleton ───────────────────────────────────────────────────
 // Register the instance created above so injected services get the same object.
 builder.Services.AddSingleton(appConfig);
+
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(appConfig.DataFolder, "keys")));
 
 
 // ── CORS ──────────────────────────────────────────────────────────────────────

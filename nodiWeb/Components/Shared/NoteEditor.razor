@@ -4,12 +4,12 @@
     <TitleContent>
         <MudTextField @bind-Value="editNote.Title" Placeholder="Title"
                       Variant="Variant.Text" Typo="Typo.h6"
-                      DisableUnderLine="true" Style="font-weight:600; font-size:1.1rem;" />
+                      Style="font-weight:600; font-size:1.1rem;" />
     </TitleContent>
     <DialogContent>
         <MudTextField @bind-Value="editNote.Content" Placeholder="Take a note..."
                       Variant="Variant.Text" Lines="4" AutoGrow="true"
-                      DisableUnderLine="true" FullWidth="true" Class="mb-2" />
+                      FullWidth="true" Class="mb-2" />
 
         @* Checklist items — divider only shown when there are items *@
         @if (items.Count > 0)
